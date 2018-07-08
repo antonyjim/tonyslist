@@ -1,0 +1,190 @@
+<% include partials/header.ejs %>
+
+<div class="add-post-card">
+    <div class="card-title add-post-card-bg">
+        Add a new post
+    </div>
+    <div class="card-body">
+        <form class="add-post-form" method="POST" action="/addImage/?sub=true" enctype="multipart/form-data">
+            <label class="form-label" for="title">
+                title
+            </label> <br>
+            <input id="title" class="user-info" type="text" name="title"><br>
+
+            <label class="form-label" for="zip">
+                zip code
+            </label><br>
+            <input id="zip" class="user-info" type="text" name="zip"><br>
+
+            <label class="form-label" for="price">
+                price
+            </label><br>
+            <input id="price" class="user-info" type="text" name="price"><br>
+
+            <label class="form-label" for="post">
+                category
+            </label><br>
+
+            <label class="check-form-label" for="cars">
+                cars and trucks
+            </label>
+            <input id="cars" name="post" type="radio" class="check-form-radio" value="cars"><br>
+
+            <label class="check-form-label" for="boats">
+                boats and watercraft
+            </label>
+            <input id="boats" name="post" type="radio" class="check-form-radio" value="boats"><br>
+
+            <label class="check-form-label" for="collect">
+                collectibles
+            </label>
+            <input id="collect" name="post" type="radio" class="check-form-radio" value="collect"><br>
+
+            <label class="check-form-label" for="electronics">
+                electronics
+            </label>
+            <input id="electronics" name="post" type="radio" class="check-form-radio" value="electronics"><br>
+
+            <label class="check-form-label" for="husapp">
+                household appliances
+            </label>
+            <input id="husapp" name="post" type="radio" class="check-form-radio" value="husapp"><br>
+
+            <label class="form-label" for="main-desc">
+                description
+            </label><br>
+            <input id="desc" class="user-info" type="text" name="desk"><br>
+
+            <label class="form-label" for="contact">
+                contact phone 
+            </label><br>
+            <input id="contact" class="user-info" type="text" name="contact"><br>
+
+            <label class="form-label" for="img">
+                image upload
+            </label><br>
+            <div id="inputCont" class="user-files">
+                <!--<input id="img1" class="user-info input" type="file" name="img1">-->
+                <span class="input" id="testplace"></span>
+            </div>
+            <button id="addimg" class="user-submit" onclick="addInput();" type="button">Add</button><br>
+            <input type="hidden" value="<%=uuid%>" name="post_pid" id="post_pid">
+            <input class="user-submit" type="submit" value="list it!">
+            <button class="user-submit" onclick="save();" type="button">save</button>
+        </form>
+
+        <div class="preview-container">
+            <iframe class="preview-iframe" id="preview" src="/preview"></iframe>
+        </div>
+        <div class="clr"></div>
+    </div>
+</div>
+
+<script>
+   /* function updateDesc() {
+        var iframe = document.getElementById('preview');
+        var things1 = {
+            post_pid : document.getElementById('post_pid').value,
+            title : document.getElementById('title').value,
+            zip : document.getElementById('zip').value,
+            price : document.getElementById('price').value,
+            desk : document.getElementById('desc').value,
+            contact : document.getElementById('tel').value
+        }
+
+        var things = {
+            post_pid : document.getElementById('post_pid').value
+        }
+        var bareframe = iframe.src.split('?')[0];
+        bareframe += queryfy(things);
+        iframe.src = bareframe;
+        console.log(bareframe);
+    }*/
+
+    function queryfy(obj) {
+        if (typeof(obj) != 'object') {
+            return 1;
+            console.error('An object must be supplied');
+        }
+        var qstring = '?';
+        for (let m in obj) {
+            let n = encodeURI(m);
+            let o = encodeURIComponent(obj[m]);
+            qstring += (n + '=' + o + '&');
+        }
+        console.log(qstring);
+        return qstring;
+    }
+
+    function reloadIf(qstr) {
+        var iframe = document.getElementById('preview');
+        var bareframe = iframe.src.split('?')[0];
+        bareframe += queryfy(qstr);
+        iframe.src = bareframe;
+    }
+
+    function save(j) {
+        if (j && j.checked == true) {var f = j.value} else {
+        var f = 0};
+        var iframe = document.getElementById('preview');
+        var id = document.getElementById('post_pid'),
+        formData = new FormData(),
+            title = document.getElementById('title'),
+            zip = document.getElementById('zip'),
+            price = document.getElementById('price'),
+            desk = document.getElementById('desc'),
+            contact = document.getElementById('contact'),
+            post_pid = document.getElementById('post_pid'),
+            post = f
+        ;
+
+        var  images = document.querySelectorAll('.input');
+        
+        formData.append(title.name, title.value);
+        formData.append(zip.name, zip.value);
+        formData.append(price.name, price.value);
+        formData.append(desk.name, desk.value);
+        formData.append('contact', contact.value);
+        formData.append('post_pid', post_pid.value);
+        formData.append('post', f);
+        
+        if (images.length > 1) {
+            for (let m of images) {
+            formData.append(m.name, m.files[0]);
+        }
+        }
+        
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = (err) => {
+                var pid = {pid : post_pid.value};
+                reloadIf(pid);
+                saved();
+        }
+        xhr.open("POST", "/addImage/", true);
+        //xhr.setRequestHeader('Content-Type', 'multipart/form-data');
+        //console.log(JSON.stringify(things));
+        xhr.send(formData);
+    }
+
+    function addInput() {
+        //<input id="img" class="user-info" type="file" name="img[]" multiple>
+        let m = document.getElementById('testplace').classList.remove('input');
+        var all = document.querySelectorAll('.input'),
+        input = document.createElement('input'),
+        root = document.getElementById('inputCont'),
+        id = 'img' + (all.length + 1);
+
+        input.id = id;
+        input.classList.add('input', 'user-info');
+        input.setAttribute('type', 'file');
+        input.setAttribute('name', id);
+        
+        root.insertBefore(input, all[0]);
+    }
+
+    function saved() {
+        console.log('saved');
+    }
+</script>
+
+<% include partials/footer.ejs %>

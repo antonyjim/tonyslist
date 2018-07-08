@@ -1,0 +1,24 @@
+<% include partials/header %>
+
+<div class="pass-reset-cont">
+    <div class="center-input">
+        <p> Please enter a new password </p>
+        <form class="pass-reset-form" action="/users/forgot/change" method="POST">
+            <label for="pass">
+                password
+            </label>
+            <input id="pass" class="user-info" type="password" name="pass">
+
+            <label for="passwordver">
+                verify
+            </label>
+            <input id="passwordver" class="user-info" type="password" name="passwordver">
+
+            <input id="pid" type="hidden" name="pid" value="<%=pid%>">
+            <input id="jwt" type="hidden" name="jwt" value="<%=jwt%>">
+            <input id="submit" class="user-submit" type="submit" value="change it!">
+        </form>
+    </div>
+</div>
+
+<% include partials/footer %>

@@ -1,0 +1,84 @@
+<% if (auth) { %>
+    <% include partials/header %>
+<% } else { %>
+    <% include partials/unauthhead %>
+<%}%>
+        <h1>Add Customer</h1>
+
+        <div class="sort"> 
+            <p>Sort by...</p>
+            <select id="sort" onchange="sortBy(this.value);">
+                <option value="state">State</option>
+                <option value="party">Party</option>
+                <option value="gender">Gender</option>
+            </select>
+        </div>
+        <div id="card-cont">
+            <% role.objects.forEach(function (objects) {%>
+                <div class="card"><% if (objects.party == 'Republican') { %>
+                    <div class="rep card-title"><%} else {%>
+                    <div class="dem card-title"><% } %>
+                        <%= objects.person.firstname %> <%= objects.person.lastname %> 
+                        (<% if (objects.person.gender == "male") {%>M<%} else { %>F<% } %>)
+                    </div>
+
+                    <div class="card-body">
+                        <ul class="sen-info">
+                            <li class="sen-item state">
+                                State: <%=objects.state %> 
+                            </li>
+                            <li class="sen-item">
+                                <a class="sen-link" target='_blank' href="<%=objects.person.link %>">Gov Track Link </a>
+                            </li>
+                            <li class="sen-item">
+                                <a class="sen-link" target='_blank' href="<%=objects.website %>">Campaign Site</a> 
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <% console.log(role.objects[0].person.lastName) %>
+
+
+    <script>
+        function sortBy(param) {
+            var cont = document.getElementById('card-cont');
+            var cards = document.getElementsByClassName('card');
+
+            if (param == 'state') {
+                sort = Array.from(cards).sort(function(a,b) {
+                    var c = a.querySelector('.state').textContent,
+                    d = b.querySelector('.state').textContent;
+                    return c < d ? -1 : d < c ? 1: 0;
+                });
+
+                for (let sorted of sort) {
+                    cont.appendChild(sorted);
+                }
+            } else {
+                //sort = cont.querySelector('.card-title');
+                //var carded = cards.querySelectorAll('.card-title');
+                //for (let sorted of sort) {
+                    if (param == 'gender') {
+                        var genderSort = Array.from(cards).sort(function (a,b) {
+                            var c = a.querySelector('.card-title').textContent,
+                            d = b.querySelector('.card-title').textContent;
+
+                            return a.contains('(M)') ? -1 : a.contains('F') ? 1 : 0 ;
+                        });
+                        console.log('got this far');
+                        for (var genderSorted of genderSort) {
+                            console.log(genderSorted);
+                            //cont.appendChild(genderSorted);
+                        }
+                    } else {
+
+                    }
+               // }
+            }
+        } 
+
+    </script>
+    <% include partials/footer %>

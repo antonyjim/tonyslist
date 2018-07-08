@@ -1,0 +1,334 @@
+/*StyleSheet for app.js*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.nav {
+    width: 100%;
+    background: #f2f2f2;
+    height: 70px;
+}
+
+.title {
+    font-size: 40px;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+    padding: 30px 80px;
+}
+
+.user-info {
+    padding: 5px 10px;
+    font-size: 20px;
+    margin: 5px 20px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: rgb(102, 180, 252);
+    font-size: 19px;
+    padding: 10px 20px;
+    background: #555;
+    margin: 0 -5px 0 0;
+    display:inline;
+}
+
+.nav-link:hover {
+    color: #555;
+    background : rgb(102, 180, 252);
+    transition: .4s;
+}
+
+.nav-link-cont {
+    float: right;
+    margin: 20px;
+}
+
+label {
+    padding: 10px 20px;
+    font-size: 18px;
+}
+
+.user-submit {
+    padding: 10px 35px;
+    font-size: 18px;
+    background: rgb(102, 180, 252);
+    outline: 0;
+    border: 0;
+    margin-left: 20px;
+}
+
+.user-submit:active {
+    background: #999;
+
+}
+
+.user-submit:hover {
+    background: #999;
+    cursor: pointer;
+}
+
+.user-submit:disabled {
+    background: rgb(102, 180, 252);
+    cursor: default;
+}
+
+.card {
+    position: relative;
+    box-shadow : 5px 5px 15px #b1b1b1;
+    border-radius: 16px;
+}
+
+.card-title {
+    border-radius: 16px 16px 0 0;
+    padding: 10px 30px;
+    font-size: 30px;
+    color : white;
+    text-shadow : 2px 2px #444;
+    font-weight: bold;
+    height: 70px;
+    margin: auto;
+    background : #2a73b8;
+}
+
+.card-body {
+    border: solid #333 1px;
+    border-radius: 0 0 6px 6px;
+    padding: 20px;
+}
+
+.detail-card {
+    margin: 15px 2%;
+    box-shadow : 5px 5px 15px #b1b1b1;
+    width: 30%;
+    position: relative; 
+    float: right;
+}
+
+.post-detail {
+    list-style : none;
+}
+
+.prev-details {
+    width : 60%;
+}
+
+.sen-info {
+    list-style: none;
+}
+
+.sen-link {
+    text-decoration: none;
+    color: #333;
+}
+
+.sen-link:hover {
+    color: #888;
+}
+
+.na {
+    width: auto;
+}
+
+#passwderr {
+    display: none;
+}
+
+/* Modal info */
+/*
+.login-modal {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    background: rgb(0, 0, 0, .9);
+}
+*/
+.modal-card {
+    width: 30%;
+    overflow: auto;
+    background: white;
+    animation-name: zoom;
+    margin: auto;
+    border-radius: 6px;
+}
+
+.modal-header {
+    background: darkolivegreen;
+    color: white;
+    text-shadow: #555;
+    padding: 10px 15px;
+    font-size: 26px;
+}
+
+.modal-close {
+    float: right;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+
+}
+
+.modal-close:hover {
+    cursor: pointer;
+    color: #f2f2f2;
+}
+
+.modal-body {
+    padding: 20px 10%;
+    background: #e8e8e8;
+}
+
+.login-info {
+    width: 80%;
+}
+
+.login-submit {
+    width: 80%;
+    margin: 5px 20px;
+    background-color: darkgoldenrod;
+    color: white;
+    padding: 5px 10px;
+    border: 0;
+    font-size: 20px;
+    transition: .2s;
+}
+
+.login-submit:hover {
+    background-color: goldenrod;
+    color: black;
+}
+
+
+.modal-links {
+    width: 80%;
+    padding: 0 5%;
+}
+
+.modal-link {
+    text-decoration: none;
+    color: #444;
+    padding: 10px;
+    font-size: 16px;
+
+}
+
+.add-post-card-bg {
+    background: #b1b1b1;
+}
+
+.add-post-card {
+    width: 90%;
+    position: relative;
+    float: left;
+    margin: 15px 2%;
+    box-shadow : 5px 5px 15px #b1b1b1;
+}
+
+.add-post-form {
+    width: 30%;
+    position: relative;
+    float: left;
+}
+
+.preview-container {
+    position: relative;
+    float: right;
+    width: 70%;
+}
+
+.image-preview-container {
+    background: #555;
+}
+
+.image-preview-container-child {
+    margin: auto;
+    width: 45%;
+}
+
+.placeholder-img {
+    width: 100%;
+}
+
+.post-act-img {
+    width: 100%;
+}
+
+.clr {
+    clear: both;
+}
+
+.preview-iframe {
+    width: 100%;
+    height: 450px;
+    border: none;
+}
+
+.desc-container {
+    font-size: 17px;
+}
+
+.title-price {
+    padding: 15px;
+}
+
+.prev-title {
+    font-size: 30px;
+    float: left;
+}
+
+.price {
+    font-size: 25px;
+}
+
+.price::before {
+    content: "$";
+    font-size: 18px;
+}
+
+.contact-num {
+    font-size: 25px;
+}
+
+.contact-num::before {
+    content : "tel: ";
+    font-size: 18px;
+}
+
+/*Create or edit Post */
+.check-form-label {
+    margin : 20px 20px;
+    padding : 0 20px;
+}
+
+.check-form-radio {
+    text-align: right;
+}
+
+/* Postlist */
+.post-sort-card {
+    width : 20%;
+    float : left;
+    margin : 40px;
+}
+
+.post-postslist {
+    width : 70%;
+    box-shadow : 10px 10px 10px grey;
+    margin: 50px 50px auto auto;
+}
+
+.post-postslist-title {
+    font-size: 30px;
+    text-decoration : none;
+    color : dodgerblue;
+}
+
+.post-postslist-title:visited {
+    color : #444;
+}

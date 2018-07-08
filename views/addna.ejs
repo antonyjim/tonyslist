@@ -1,0 +1,19 @@
+<% include partials/header.ejs %>
+
+<form method="POST" action="add">
+    <div class="card na">
+        <div class="card-title">
+            Add National Account
+        </div>
+        <div class="card-body">
+            <label>National Account Name</label><br>
+            <input class="user-info" type="text" name="naName"><br>
+            <label>National Account Number</label><br>
+            <input class="user-info" type="text" name="nano"><br>
+
+            <button type="submit" class="user-submit">Submit</button>
+        </div>
+    </div>
+</form>
+
+<% include partials/footer %>

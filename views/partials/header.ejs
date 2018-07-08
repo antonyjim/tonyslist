@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= title %></title>
+        <link rel="stylesheet" href="/public/style.css">
+    </head>
+    
+    <body>
+        <nav class="nav">
+            <span class="title">tonyslist</span>
+            <div class="nav-link-cont">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/sell/">Sell</a>
+                <a class="nav-link" href="/posts/">Posts</a>
+                <% if (auth.auth) { %>
+                    <a class="nav-link" href="/account/?user=<%=auth.user%>">Account</a>
+                    <a class="nav-link register" href="/logout/">Logout</a>
+                <% } else { %>
+                    <a class="nav-link" href="/login/">Sign in or Register</a>
+                <% } %>    
+            </div>
+        </nav>

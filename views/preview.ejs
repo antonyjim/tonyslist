@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/public/style.css">
+    </head>
+
+    <body onload="parseQuery()">
+            <div class="image-preview-container">
+                    <div class="image-preview-container-child">
+                        <div class="image-preview">
+                            <div class="root">
+                                <% if (typeof post !== 'undefined') {%>
+                                    <% for (let m in post.images) {%>
+                                        <div class="post-img">
+                                            <img class="post-act-img" src="/public/images/<%=post.post_pid%>/<%=post.images[m]%>">
+                                        </div>
+                                    <%}%>
+                                <%} else {%>
+                                    <div class="placeholder">
+                                            <img class="placeholder-img" src="/public/images/noimage.png">
+                                        </div>
+                                <%}%>
+                                 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prev-details">
+                    <div class="title-price">
+                        <span id="title" class="prev-title"></span>
+                        <div class="clr"></div>
+                    </div>
+                    <div id="desc" class="desc-container"></div>
+                    <span id="post_pid"></span>
+                </div>
+                <div class="prev-detail">
+                    <div class="detail-card">
+                        <div class="card-title">
+                            Contact Info
+                        </div>
+                        <div class="card-body detail-card-body">
+                            <ul class="post-detail">
+                                <li id="price" class="price"> </li>
+                                <li id="contact-num" class="contact-num"> </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                    
+                </div>
+                <% if (typeof post !== 'undefined') {%>
+                    <script>
+                        function parseQuery() {
+                            var results = {
+                                desk : '<%=post.desk%>',
+                                title : '<%=post.title%>',
+                                price : '<%=post.price%>',
+                                post_pid : '<%=post.post_pid%>',
+                                contact : '<%=post.contact%>'
+                            };
+                               
+                            console.log('<%=post.contact%>');
+                                
+                                var q;
+                                document.getElementById('desc').innerHTML = results.desk;
+                                document.getElementById('title').innerHTML = results.title;
+                                document.getElementById('price').innerHTML = results.price;
+                                document.getElementById('post_pid').innerHTML = results.post_pid;
+                                document.getElementById('contact-num').innerHTML = results.contact;
+                        }
+                    </script>
+                <%} else {%>
+                    <script>
+                        function parseQuery() {
+                            var results = {};
+                            
+                            var str = window.location.href.split('?');
+                            if (str.length == 1) {
+                                console.log('No query string found')
+                            } else {
+                                var vrbl = str[1].split('&');
+                                var q;
+                                for (let g of vrbl) {
+                                    console.log(g);
+                                    q = g.split('=');
+                                    results[q[0]] = decodeURIComponent(q[1]);
+                                }
+                                document.getElementById('desc').innerHTML = results.desk;
+                                document.getElementById('title').innerHTML = results.title;
+                                document.getElementById('price').innerHTML = results.price;
+                                document.getElementById('post_pid').innerHTML = results.post_pid;
+                                document.getElementById('contact-num').innerHTML = results.contact;
+                                }
+                            
+                        }
+                    </script>
+                <%}%>
+    </body>
+</html>

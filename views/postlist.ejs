@@ -1,0 +1,36 @@
+<% include partials/header %>
+
+<div class="card post-sort-card">
+    <div class="card-title post-sort-card-title">
+        filter
+    </div>
+    <form onsubmit="filter();">
+        <div class="category-sort-cont">
+            <% for(let j in post) { %>
+                <label class="category-sort-label" for="<%=post[j].post">
+                    <%=post[j].post%>
+                </label>
+                <input class="category-sort" id="<%=post[j].post%>" value="<%=post[j].post%>">
+            <% } %>
+        </div>
+       
+    </form>
+</div>
+
+<% for (let m of post) { %>
+    <div class="post-postslist">
+        <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
+        <a class="post-postslist-title" href="/posts/?pid=<%=m.post_pid%>">
+            <%=m.title%>
+        </a>
+        <div class="post-postslits-short">
+            <%=m.shortdesk%>
+        </div>
+        <div class="post-postslist-price">
+            <%=m.price%>
+        </div>
+    </div>
+<% } %>
+
+
+<% include partials/footer %>

@@ -1,0 +1,52 @@
+<% include partials/header %>
+        <h1>Register</h1>
+
+        <form method="POST" action="/users/register">
+            <label>First Name</label><br>
+            <input class="user-info" type="text" name="givenname" id="givenname" autocomplete="given-name"><br>
+            
+            <label>Last Name</label><br>
+            <input class="user-info" type="text" name="famname" id="famname" autocomplete="family-name"><br>
+            
+            <label>Email</label><br>
+            <input class="user-info" type="text" name="email" id="email" autocomplete="email"><br>
+
+            <% if (errlev == 1) { %>
+                <div class="username-err">
+                    That email is already in use!
+                    <a href="/users/forgot">Forgot Password?</a>
+                </div>
+            <% } %>
+
+            <label>Password</label><br>
+            <input class="user-info" type="password" minlength="8" name="passwd" id="passwd" autocomplete="new-password" onkeyup="passwdVer();"><br>
+
+            <label>Verify Password</label><br>
+            <input class="user-info" type="password" minlength="8" name="passwdver" id="passwdver" autocomplete="new-password" onkeyup="passwdVer();"><br>
+
+            <div id="passwderr">
+                Error, Password do not match
+            </div>
+
+            <input class="user-submit" type="submit" value="Submit" id="submit" disabled="disabled">
+        </form>
+        <script>
+                    
+        function passwdVer() {
+            var passwd1 = document.getElementById('passwd'),
+            passwd2 = document.getElementById('passwdver'),
+            submit = document.getElementById('submit'),
+            err1 = document.getElementById('passwderr');
+
+            if (passwd1.value != passwd2.value || passwd1.value == "") {
+                submit.setAttribute('disabled', 'disabled');
+                err1.style.display = "block";
+            } else {
+                submit.removeAttribute('disabled');
+                err1.style.display = "none";
+            }
+        }
+     
+        </script>
+
+<% include partials/footer %>

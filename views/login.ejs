@@ -1,0 +1,32 @@
+<% include partials/header %>
+
+<div class="login-modal" id="loginModal">
+    <form action="/login" method="POST">
+        <div class="modal-card" id="loginModalCard">
+            <div class="modal-header">
+                <div class="modal-title">
+                    Login
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-inputs">
+                    <input class="user-info login-info" type="text" placeholder="Email" maxlength="30" name="email" autocomplete="email">
+                    <input class="user-info login-info" type="password" placeholder="Password" name="password" autocomplete="current-password">
+                    <% if (passwordErr) { %>
+                        <div class="pass-err">
+                            <p>
+                                Error! Incorrect Email or Password
+                            </p>
+                        </div>
+                    <%}%>
+                    <input class="login-submit" type="submit" value="Login">
+                </div>
+                <div class="modal-links">
+                    <a class="modal-link" href="/users/forgot">Forgot Password</a>  |  <a class="modal-link" href="/users/register">Register</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<% include partials/footer %>

@@ -1,0 +1,16 @@
+<% include partials/header %>
+
+<div class="pass-reset-cont">
+    <div class="center-input">
+        <p> If there is an account on file with this username, we will send a password reset email soon </p>
+        <form class="pass-reset-form" action="/users/forgot" method="POST">
+            <label for="email">
+                email
+            </label>
+            <input id="username" class="user-info" type="text" name="username">
+            <input id="submit" class="user-submit" type="submit" value="send it!">
+        </form>
+    </div>
+</div>
+
+<% include partials/footer %>
