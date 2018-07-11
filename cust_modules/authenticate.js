@@ -2,15 +2,11 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
-var connection = mysql.createConnection({
-    host    : '127.0.0.1',
-    user    : 'aj',
-    password : 'horsebatterystaple',
-    database : 'users'
-});
+var secrets = require('./boxofsecrets.j.js');
+var connection = mysql.createConnection(secrets.connection);
 
-const secret = '50bff50f1ffc4d5585212866ad5d6884';
-const saltRounds = 10;
+const secret = secrets.jwt;
+const saltRounds = secrets.salt;
 
 //User functions
 
@@ -205,7 +201,7 @@ exports.updatePost = data => {
 exports.getPost = (post_pid) => {
     return  new Promise ((res, rej) => {
         var j = new Promise((ress, rejj) => {
-            connection.query('SELECT post, post_pid, desk, price, title, zip FROM post WHERE post_pid = ?', post_pid, (err, results, fields) => {
+            connection.query('SELECT post, post_pid, desk, price, title, pid, contact, zip FROM post WHERE post_pid = ?', post_pid, (err, results, fields) => {
                 if (err) {rej(err)};
                 if (results == '') {
                     console.log('No results found ', results)

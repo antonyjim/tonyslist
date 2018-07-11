@@ -1,9 +1,44 @@
 <% include partials/header %>
 
 <%= auth.user %>
+<div id="error-box">
 
+</div>
+<div class="modify-user-info-card card">
+    <div class="modify-user-info-card-title card-title">
+        manage account
+    </div>
+    <div class="modify-user-info-card-body card-body">
+        <ul>
+            <li>
+                <span class="modify-user-link" onclick="passwdmod()">
+                    Change Password
+                </span>
+            </li>
+            <li>
+                <span class="modify-user-link" onclick="emailmod()">
+                    Change Email
+                </span>
+            </li>
+            <li>
+                <span class="modify-user-link" onclick="advertmod()">
+                    Manage My Adverts
+                </span>
+            </li>
+            <li>
+                <span class="modify-user-link" onclick="deletemod()">
+                    Delete My Account
+                </span>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="active-posts">
+    Active Posts
+</div>
 <% for (let m of post) { %>
     <div class="post-postslist">
+        <a href="/posts/edit/?pid=<%=m.post_pid%>" class="post-postlist-edit">Edit</a>
         <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
         <a class="post-postslist-title" href="/posts/?pid=<%=m.post_pid%>">
             <%=m.title%>
@@ -16,6 +51,20 @@
         </div>
     </div>
 <% } %>
+<div class="mod-modal" id="mod-modal">
+    <div class="mod-modal-background">
+        <div class="mod-modal-card card">
+            <span class="close" id="close" onclick="closeModal();">X</span>
+            <div id="mod" class="mod-modal-card-title card-title">
+
+            </div>
+            <div id="mod-body" class="mod-modal-card-body card-body">
+
+            </div>
+        </div>
+    </div>
+</div>
 
 
+<script src="/public/scripts/account.js"></script>
 <% include partials/footer %>

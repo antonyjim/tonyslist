@@ -1,0 +1,20 @@
+{
+    "title" : "change password",
+    "action" : "account/updinfo/passwd",
+    "inputs" : [{
+        "type" : "password",
+        "name" : "verNewPass",
+        "id" : "verNewPass",
+        "label" : "verify new password"
+    } , {
+        "type" : "password",
+        "name" : "newPass",
+        "id" : "newPass",
+        "label" : "new password"
+    } , {
+        "type" : "password",
+        "name" : "oldPass",
+        "id" : "oldPass",
+        "label" : "old password"
+    }]
+}

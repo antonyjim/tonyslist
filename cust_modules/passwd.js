@@ -2,17 +2,13 @@ var authenticate = require('./authenticate.js');
 var nodemailer = require('nodemailer');
 var uuidv4 = require('uuid/v4');
 var jwt = require('jsonwebtoken');
+var secrets = require('./boxofsecrets.j.js');
 
-var secret = 'vtaesmnsnk5vdlw2';
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'vtaesmnsnk5vdlw2@ethereal.email',
-        pass: 'DUzSm2EmbgMpDWz3BD'
-    }
-});
+
+const secret = secrets.secret;
+
+const transporter = nodemailer.createTransport(secrets.transporter);
 
 exports.reset = email => {
     var ptoken = uuidv4();

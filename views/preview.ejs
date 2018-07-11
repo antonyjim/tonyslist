@@ -31,7 +31,6 @@
                         <div class="clr"></div>
                     </div>
                     <div id="desc" class="desc-container"></div>
-                    <span id="post_pid"></span>
                 </div>
                 <div class="prev-detail">
                     <div class="detail-card">
@@ -46,8 +45,7 @@
                         </div>
                     </div>
                 </div>
-                    
-                </div>
+
                 <% if (typeof post !== 'undefined') {%>
                     <script>
                         function parseQuery() {
@@ -65,7 +63,6 @@
                                 document.getElementById('desc').innerHTML = results.desk;
                                 document.getElementById('title').innerHTML = results.title;
                                 document.getElementById('price').innerHTML = results.price;
-                                document.getElementById('post_pid').innerHTML = results.post_pid;
                                 document.getElementById('contact-num').innerHTML = results.contact;
                         }
                     </script>
@@ -88,7 +85,6 @@
                                 document.getElementById('desc').innerHTML = results.desk;
                                 document.getElementById('title').innerHTML = results.title;
                                 document.getElementById('price').innerHTML = results.price;
-                                document.getElementById('post_pid').innerHTML = results.post_pid;
                                 document.getElementById('contact-num').innerHTML = results.contact;
                                 }
                             

@@ -90,20 +90,30 @@ module.exports = (app) => {
     });
 
     app.get('/add/addpost', (req, res) => {
-        res.render('addpost', {
-            title: "Add Post",
-            errlev : 0,
-            auth : auth
-        })
+        if (auth.auth) {
+            res.render('addpost', {
+                title: "Add Post",
+                errlev : 0,
+                auth : auth
+            })
+        } else {
+            redirect('/login/');
+        }
+
+        
     })
 
     app.get('/login', (req, res) => {
-        res.render('login', {
-            title: "Login", 
-            passwordErr: undefined,
-            errlev: 0,
-            auth : auth
-        })
+        if (auth.auth) {
+            res.redirect('/');
+        } else {
+            res.render('login', {
+                title: "Login", 
+                passwordErr: undefined,
+                errlev: 0,
+                auth : auth
+            })
+        }
     })
 
     app.get('/users/forgot', (req, res) => {
@@ -141,8 +151,9 @@ module.exports = (app) => {
     })
 
     app.get('/account', (req, res) => {
-        var f = authenticate.getAcctPost({pid : auth.user});
-        f.then (resolved => {
+        if (auth.auth) {
+            var f = authenticate.getAcctPost({pid : auth.user});
+            f.then (resolved => {
                 res.render('account', {
                     title : 'Account',
                     post : resolved,
@@ -157,11 +168,15 @@ module.exports = (app) => {
             }).catch (err => {
                 console.log(err)
             })
+        } else {
+            res.redirect('/login/');
+        }
+        
     })
 
     app.get('/sell', (req, res) => {
         if (!auth.auth) {
-            res.redirect(401, '/login');
+            res.redirect(302, '/login');
         } else {
             res.render('addpost', {
                 title : 'New Post',
@@ -191,6 +206,32 @@ module.exports = (app) => {
             })
         } else {
             res.render('preview');
+        }
+    })
+
+    app.get('/posts/edit', (req, res) => {
+        if (!req.query.pid) {
+            res.redirect('/account/');
+        } else if (!auth.auth) {
+            res.redirect('/login/');
+        } else if (req.query.pid) {
+            var f = authenticate.getPost(req.query.pid);
+
+            f.then(resolved => {
+                if (resolved.pid == auth.user) {
+                    res.render('edit', {
+                        title : 'edit post',
+                        post : resolved,
+                        auth : auth
+                    })
+                } else {
+                    res.redirect('/account/');
+                }
+            }, reason => {
+                res.redirect('/account/?' + reason);
+            }).catch (err => {res.redirect('/account/?' + err)})
+        } else {
+            redirect ('/posts/');
         }
     })
        
@@ -336,6 +377,16 @@ module.exports = (app) => {
         }).catch(err => {console.error(err)});
     })
 
+    app.post('/users/update', (req, res) => {
+        var updInfo = authenticate.updInfo(req.body);
+
+        updInfo.then(resolved => {
+            res.status(302);
+        }, reason => {
+            res.status(403);
+        })
+    })
+
     app.post('/addImage', (req, res) => {
         var form = new frm.IncomingForm();
         form.uploadDir = path.join(__dirname, '../public/images');
@@ -391,7 +442,7 @@ module.exports = (app) => {
                 update.then (pu => {
                     console.log('pu', pu)
                     if (req.query.sub == 'true') {
-                        res.redirect(200, '/posts/?pid=' + pu);
+                        res.redirect(302, '/posts/?pid=' + pu);
                     } else {
                         console.log(req.query);
                     }

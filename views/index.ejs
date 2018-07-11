@@ -1,23 +1,21 @@
 <% include partials/header %>
-<div class="nav-bar">
-    
-</div>
 
 <div class="main-content">
     <div class="main-article">
-        <div class="main-image">
-            <div class="main-image-img">
-
-            </div>
-            <div class="main-image-alt">
+        <h3 class="index-title">news</h3>
+        <div class="img-header light-box">
+            <div class="img-header-desc" class="img-header-img">
 
             </div>
         </div>
-        <div class="main-article-slides-title">
+    </div>
+   
+    <div class="new-article-slide-box">
+        <div class="light-box">
             <% for (let m in post) { %>
                 <div class="top-article-slide">
                     <div class="article-slide-image">
-                        <a href="/posts/?<%=post[m].post_pid%>" class="article-slide-a">
+                        <a href="/posts/?pid=<%=post[m].post_pid%>" class="article-slide-a">
                             <img class="article-slide-img" src="/public/images/<%=post[m].post_pid%>/thmb.jpg">
                             <div class="article-slide-title"><%=post[m].title%></div> 
                         </a>
@@ -25,29 +23,26 @@
                 </div>
             <% } %>
         </div>
-        <div class="main-article-slides">
-            
-        </div>
     </div>
+    <div class="clr"></div>
 
     <div class="category-listing-cont">
-        <div class="card">
-            <div class="card-title">
-                Categories
-            </div>
-            <div class="card-body">
-                <ul class="category-list">
-                    <li class="category-item">
-                        Appliances
-                    </li>
-                    <li class="category-item">
-                        Boats & Watercraft
-                    </li>
-                </ul>
+            <div class="card index-category-card">
+                <div class="card-title">
+                    Categories
+                </div>
+                <div class="card-body">
+                    <ul class="category-list">
+                        <li class="category-item">
+                            Appliances
+                        </li>
+                        <li class="category-item">
+                            Boats & Watercraft
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-
 </div>
 
 <% include partials/footer %>
