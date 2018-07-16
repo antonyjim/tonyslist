@@ -5,7 +5,8 @@
         add a new post
     </div>
     <div class="card-body">
-        <form class="add-post-form" method="POST" action="/addImage/?sub=true" enctype="multipart/form-data">
+        <form method="POST" action="/addImage/?sub=true" enctype="multipart/form-data">
+        <div class="add-post-form">
             <label class="form-label" for="title">
                 title
             </label> <br>
@@ -50,11 +51,6 @@
             </label>
             <input id="husapp" name="post" type="radio" class="check-form-radio" value="husapp"><br>
 
-            <label class="form-label" for="main-desc">
-                description
-            </label><br>
-            <input id="desc" class="user-info" type="text" name="desk"><br>
-
             <label class="form-label" for="contact">
                 contact phone 
             </label><br>
@@ -68,39 +64,29 @@
                 <span class="input" id="testplace"></span>
             </div>
             <button id="addimg" class="user-submit" onclick="addInput();" type="button">Add</button><br>
-            <input type="hidden" value="<%=uuid%>" name="post_pid" id="post_pid">
-            <input class="user-submit" type="submit" value="list it!">
-            <button class="user-submit" onclick="save();" type="button">save</button>
-        </form>
-
+            <div class="submit-buttons">
+                <input type="hidden" value="<%=uuid%>" name="post_pid" id="post_pid">
+                <input class="user-submit" type="submit" value="list it!">
+                <button class="user-submit" onclick="save();" type="button">save</button>
+            </div>
+          </div>
         <div class="preview-container">
             <iframe class="preview-iframe" id="preview" src="/preview"></iframe>
         </div>
+
+        <div class="description-text-box">
+            <label class="form-label" for="main-desc">
+                description
+            </label><br>
+
+            <textarea id="desk" class="user-info desk-text" type="text" name="desk" rows="8" cols="70" required></textarea>
+        </div>
+        </form>
         <div class="clr"></div>
     </div>
 </div>
 
 <script>
-   /* function updateDesc() {
-        var iframe = document.getElementById('preview');
-        var things1 = {
-            post_pid : document.getElementById('post_pid').value,
-            title : document.getElementById('title').value,
-            zip : document.getElementById('zip').value,
-            price : document.getElementById('price').value,
-            desk : document.getElementById('desc').value,
-            contact : document.getElementById('tel').value
-        }
-
-        var things = {
-            post_pid : document.getElementById('post_pid').value
-        }
-        var bareframe = iframe.src.split('?')[0];
-        bareframe += queryfy(things);
-        iframe.src = bareframe;
-        console.log(bareframe);
-    }*/
-
     function queryfy(obj) {
         if (typeof(obj) != 'object') {
             return 1;

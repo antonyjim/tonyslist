@@ -1,5 +1,6 @@
-<% include partials/header %>
-<input type="hidden" id="pid" value="<%= auth.user %>">
+<% include partials/acctheader %>
+
+<input type="hidden" id="pid" value="<%=auth.user%>">
 <div id="error-box">
 
 </div>
@@ -14,21 +15,26 @@
     </div>
     <div class="modify-user-info-card-body card-body">
         <ul>
-            <li>
+            <li class="modify-user-li">
+                <span class="modify-user-link" onclick="mod('otherinfo');">
+                    Other Info
+                </span>
+            </li>
+            <li class="modify-user-li">
                 <span class="modify-user-link" onclick="mod('passwdmod')">
                     Change Password
                 </span>
             </li>
-            <li>
+            <li class="modify-user-li">
                 <span class="modify-user-link" onclick="mod('emailmod')">
                     Change Email
                 </span>
-            </li>
+            </li class="modify-user-li">
             <li>
                 <span class="modify-user-link" onclick="advertmod()">
                     Manage My Adverts
                 </span>
-            </li>
+            </li class="modify-user-li">
             <li>
                 <span class="modify-user-link" onclick="mod('delmod')">
                     Delete My Account
@@ -41,36 +47,28 @@
     Active Posts
 </div>
 <% for (let m of post) { %>
-    <div class="post-postslist">
-        <a href="/posts/edit/?pid=<%=m.post_pid%>" class="post-postlist-edit">Edit</a>
-        <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
+    <div class="post-postslist card">
+        <div class="post-thmb-cont">
+                <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
+        </div>
+        
         <a class="post-postslist-title" href="/posts/?pid=<%=m.post_pid%>">
             <%=m.title%>
         </a>
-        <div class="post-postslits-short">
-            <%=m.shortdesk%>
-        </div>
-        <div class="post-postslist-price">
-            <%=m.price%>
+        <div class="post-postlist-desc-cont">
+                <div class="post-postslits-short">
+                        <%=m.shortdesk%>
+                </div>
+                <div class="price">
+                    <%=m.price%>
+                </div>
+                <a href="/posts/edit/?pid=<%=m.post_pid%>" class="post-postlist-edit">Edit</a>
         </div>
     </div>
 <% } %>
-<div class="mod-modal" id="mod-modal">
-    <div class="mod-modal-background">
-        <div class="mod-modal-card card">
-            <div id="mod" class="mod-modal-card-title card-title">
-                    <h4 id="title" class="mod-modal-title"></h4>
-                    <span class="close" id="close" onclick="closeModal();">X</span>
-            </div>
-            <div id="mod-error"></div>
-            <div id="mod-body" class="mod-modal-card-body card-body">
-
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 <script src="/public/scripts/account.js"></script>
+
 <% include partials/footer %>

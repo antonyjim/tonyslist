@@ -10,6 +10,11 @@
     466 : User exists and is you
     467 : Mismatched Verification
     468 : Empty Body
+    469 : Password Reset Warrant
+    470 : Email verification out
+    471 : Inactive User
+    472 : Missing Info
+    473 : Empty query
 */
 
 exports.Error = function (code, status) {

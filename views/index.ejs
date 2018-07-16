@@ -11,38 +11,59 @@
     </div>
    
     <div class="new-article-slide-box">
+        <h3 class="index-title">recently added</h3>
         <div class="light-box">
-            <% for (let m in post) { %>
+            <% for (let m in post.results) { %>
                 <div class="top-article-slide">
                     <div class="article-slide-image">
-                        <a href="/posts/?pid=<%=post[m].post_pid%>" class="article-slide-a">
-                            <img class="article-slide-img" src="/public/images/<%=post[m].post_pid%>/thmb.jpg">
-                            <div class="article-slide-title"><%=post[m].title%></div> 
-                        </a>
+                        <div class="">
+                            <div class="top-article-image-lightbox">
+                                <img class="article-slide-img" src="/public/images/<%=post.results[m].post_pid%>/thmb.jpg">
+                                <span class="price">
+                                        <%=post.results[m].price%>
+                                </span>
+                            </div>
+                            
+                            <a href="/posts/?pid=<%=post.results[m].post_pid%>" class="article-slide-title article-slide-a">
+                                <%=post.results[m].title%>
+                            </a> 
+                        </div>
                     </div>
                 </div>
             <% } %>
         </div>
     </div>
-    <div class="clr"></div>
-
-    <div class="category-listing-cont">
+    <div class="index-lower-left">
+        <div class="category-listing-cont">
             <div class="card index-category-card">
                 <div class="card-title">
                     Categories
                 </div>
                 <div class="card-body">
                     <ul class="category-list">
-                        <li class="category-item">
-                            Appliances
-                        </li>
-                        <li class="category-item">
-                            Boats & Watercraft
-                        </li>
+                        <% for (let m in post.categories) { %>
+                            <li class="category-item">
+                                <a href="/posts/?cat=<%=post.categories[m].post%>">
+                                    <%=post.categories[m].post%>                    
+                                </a>
+                            </li>
+                        <% } %>
                     </ul>
                 </div>
             </div>
+            <div class="md-advert">
+                <a class="a-advert" href="#">
+                    <img src="/public/images/test/TrueValueLogo.jpg" class="md-advert-img">
+                    <p class="md-advert-desc">
+                        Todds Hardware and Supply<br>
+
+                        Star Lake, NY 13690<br>
+                        Phone : 315-445-7564<br>
+                    </p>
+                </a>
+            </div>
         </div>
+    </div>
 </div>
 
 <% include partials/footer %>

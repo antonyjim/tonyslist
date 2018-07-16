@@ -1,0 +1,23 @@
+<% include partials/header %>
+
+<div class="main-cont">
+    <form method="POST" action="/users/moreinfo">
+        <div class="moreinfo-inputs">
+            <label for="zip" class="form-label">
+                zip code
+            </label><br>
+            <input type="text" class="user-info" id="zip" name="zip"><br>
+
+            <label for="phone">
+                phone number
+            </label><br>
+            <input type="text" class="user-info" id="phone" name="phone"><br>
+
+            <input type="hidden" name="pid" value="<%=user%>">
+
+            <input type="submit" class="user-submit" value="okay">
+        </div>
+    </form>
+</div>
+
+<% include partials/footer %>

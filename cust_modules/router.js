@@ -17,19 +17,18 @@ password = 0;
 
 module.exports = (app) => {
 
-
-
     //Middleware
     app.use(cookieParser());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: false}));
+    //Authentication Middleware
     app.use((req, res, next) => {
         if (req.cookies.auth) {
             var authedd = authenticate.checkToken(req.cookies.auth);
             
             authedd.then (resolve => {
                 auth.auth = resolve.auth;
-                auth.user = resolve.user;
+                auth.user = resolve.pid;
                 auth.userlevel = resolve.userlevel;
                 res.cookie('auth', resolve.cookie);
                 next();
@@ -47,14 +46,20 @@ module.exports = (app) => {
             next();
         }
     });
-    app.use((req, res, next) => {
-        next();
-    })
+    /*
+        A note on my authentication and lessons learned: 
 
-
-
+        My current authentication works by passing a boolean to the auth.auth property,
+        and then it passes the auth object to every single template that includes
+        partials/header/ejs or partials/headeracct.ejs. This is not the best way to do 
+        it. In the future I will most likely resort to using passport or similar authentication
+        strategy.
+    */
 
     //GET Requests
+
+    //Fairly straightforward homepage. In the future I will utilize ejs
+    //caching so there isn't an sql query everytime the page is called.
     app.get('/', (req, res) => {
         var getHot = authenticate.getHot();
 
@@ -74,21 +79,7 @@ module.exports = (app) => {
 
     });
 
-    app.get('/posts/add', (req, res) => {
-        if (auth.auth) {
-            res.render('addpost', {
-                title: "Add Post",
-                errlev : 0,
-                uuid : auth.user,
-                auth : auth
-            })
-        } else {
-            redirect('/login/');
-        }
-
-        
-    })
-
+    //Registration Screen
     app.get('/users/register', (req, res) => {
         res.render('users', {
             title: 'User Info',
@@ -97,6 +88,7 @@ module.exports = (app) => {
         })
     })
     
+    //Login screen
     app.get('/login', (req, res) => {
         if (auth.auth) {
             res.redirect('/');
@@ -111,6 +103,7 @@ module.exports = (app) => {
         }
     })
     
+    //Verify email
     app.get('/users/verify', (req, res) => {
         if (req.query.ptoken) {
             var verEmail = passwd.verEmail(req.query.ptoken);
@@ -125,10 +118,10 @@ module.exports = (app) => {
         }
     })
     
+    //Request Password Screen
     app.get('/users/forgot', (req, res) => {
         if (req.query.ptoken) {
             var verPt = passwd.verToken(req.query.ptoken);
-            console.log(req.query);
             verPt.then(resolved => {
                 if (resolved.pid) {
                     res.render('resetpass', {
@@ -154,6 +147,7 @@ module.exports = (app) => {
         }
     })
 
+    //Cancel deletion screen
     app.get('/users/deletion/', (req, res) => {
         if (req.query.deletion) {
             authenticate.cancelDelete(req.query.deletion).then(resolved => {
@@ -180,11 +174,13 @@ module.exports = (app) => {
         }
     })
     
+    //Logout
     app.get('/logout', (req, res) => {
         res.cookie('auth', null);
         res.redirect(302, '/');
     })
 
+    //Account posts and details
     app.get('/account', (req, res) => {
         if (auth.auth) {
             var f = authenticate.getAcctPost({pid : auth.user});
@@ -206,21 +202,55 @@ module.exports = (app) => {
         } else {
             res.redirect('/login/');
         }
+    })
+
+    //An unfortunate way around rewriting an xhr function. Dirty, but it works good
+    app.get('/public/layouts/otherinfo.json', (req, res) => {
+        new Promise((resolve, reject) => {
+            fs.readFile('/home/aj/Desktop/newnode/public/layouts/otherinfo.json', (err, data) => {
+                if (err) {reject(err)}
+                else {
+                    resolve(data);
+                }
+            })
+        }).then(resolved => {
+            authenticate.userDataGet(auth.user).then(reso => {
+                var oi = JSON.parse(resolved);
+                oi.inputs[0].otherAct = reso.zip;
+                oi.inputs[1].otherAct = reso.phone;
+                res.send(JSON.stringify(oi));
+            }, reas => {
+                console.log(reas);
+                res.sendStatus(500);
+            }).catch(err => {
+                console.log(err);
+            })
+        } , reason => {
+            conosle.log('Sent');
+            res.sendStatus(reason.errno);
+        }).catch(err => {
+            console.log(err);
+            res.sendStatus(501);
+        })
+    })
+
+    //Create a new post
+    app.get('/posts/add', (req, res) => {
+        if (auth.auth) {
+            res.render('addpost', {
+                title: "Add Post",
+                errlev : 0,
+                uuid : auth.user,
+                auth : auth
+            })
+        } else {
+            res.redirect('/login/');
+        }
+
         
     })
 
-    app.get('/posts/sell', (req, res) => {
-        if (!auth.auth) {
-            res.redirect(302, '/login');
-        } else {
-            res.render('addpost', {
-                title : 'New Post',
-                uuid : uuidv4(),
-                auth : auth
-            })
-        }
-    })
-
+    //For the iframe on the edit and add screen.
     app.get('/preview', (req, res) => {
         var pid = req.query.pid;
         console.log(req.body.query);
@@ -244,7 +274,8 @@ module.exports = (app) => {
         }
     })
 
-    app.get('/posts/edit', (req, res) => {
+    //Edit an already created and active post
+    app.get('/posts/edit/', (req, res) => {
         if (!req.query.pid) {
             res.redirect('/account/');
         } else if (!auth.auth) {
@@ -270,11 +301,11 @@ module.exports = (app) => {
         }
     })
        
-    app.get('/posts', (req, res) => {
+    //Main post listing screen.
+    app.get('/posts/', (req, res) => {
         var conditions = {};
         if (req.query.cat) {
-            conditions.post = req.query.cat;
-
+            conditions.post = req.query.cat.split(' ');
         } else if (req.query.pid) {
             conditions.post_pid = req.query.pid;
         } else {
@@ -320,6 +351,7 @@ module.exports = (app) => {
 
     //Post Requests
 
+    //Create user in database
     app.post('/users/register', (req, res) => {  
         var newUser = {
             givenname: req.body.givenname,
@@ -358,6 +390,7 @@ module.exports = (app) => {
         });
     });
     
+    //Authenticate with db
     app.post('/login', (req, res) => {
         if (auth.auth == true) {
             console.log('Already logged in');
@@ -375,32 +408,60 @@ module.exports = (app) => {
                     res.cookie('auth', results);
                     res.redirect(302, '/');
                 } , reason => {
-                    res.render ('login', {
-                        title: "Error",
-                        passwordErr: reason,
-                        auth: auth
-                    });
+                    if (reason.code == 472) {
+                        res.render('moreinfo', {
+                            title: 'More Info',
+                            user: reason.user,
+                            auth: auth
+                        })
+                    } else {
+                        res.render ('login', {
+                            title: "Error",
+                            passwordErr: reason,
+                            auth: auth
+                        });
+                    }
                 });
     
             
         }});
+
+    //Process first login form.
+    app.post('/users/moreinfo/', (req, res) => {
+        if (!req.body.pid) {
+            res.redirect('/login/');
+        } else {
+            authenticate.userDataUpd(req.body).then(resolved => {
+                res.redirect('/');
+            }, reason => {
+                console.log(reason);
+                res.render('moreinfo', {
+                    title : 'An error occured',
+                    auth : auth
+                })
+            }).catch(err => {
+                console.log(err); 
+                res.redirect('/login');
+            })
+        }
+    })
     
+    //Send out password email
     app.post('/users/forgot', (req, res) => {
         var email = req.body.username;
         passwd.reset(email);
         res.redirect('/');
     })
     
+    //Password reset screen
     app.post('/users/forgot/change', (req, res) => {
         var verPt = passwd.verToken(req.body.jwt);
     
         verPt.then(resolved => {
             var f = authenticate.forcePass(req.body.pass, req.body.pid);
             f.then(resolved1 => {
-                console.log(resolved1);
-                res.redirect('/users/login');
+                res.redirect('/login');
             }, reason1 => {
-                console.log(reason1);
                 res.redirect('/users/forgot');
             }).catch(err => console.error(err));
         }, reason => {
@@ -409,6 +470,7 @@ module.exports = (app) => {
         }).catch(err => {console.error(err)});
     })
 
+    //Update either the email, password or user_data table
     app.post('/account/update/', (req, res) => {
         if (!auth.auth) {
             res.status(403); 
@@ -431,7 +493,9 @@ module.exports = (app) => {
                         }
                     } else if (fields.username || fields.email) {
                         reso(fields)
-                    } else {
+                    } else if (fields.zip || fields.phone) {
+                        reje({code : 999, fields : fields});
+                    } else{
                         reje(new gr.Error(463, 'Not email or password'))
                     }
                 }
@@ -449,13 +513,25 @@ module.exports = (app) => {
                 res.sendStatus(reason);
             }).catch(err => res.status(500).send(err))
         }, reason => {
-            res.sendStatus(500)
-            console.log('The reason is ', reason)
+            if (reason.code == 999) {
+                authenticate.userDataUpd(reason.fields).then(resolve => {
+                    res.sendStatus(resolve);
+                }, reasoning => {
+                    res.sendStatus(reasoning)
+                }).catch(err => {
+                    console.log(err);
+                    res.sendStatus(500);
+                })
+            } else {
+                res.sendStatus(500)
+                console.log('The reason is ', reason)
+            }
         }).catch(err => {
             console.log(err);
         })
     })
 
+    //Put a new or updated post in the db.
     app.post('/addImage', (req, res) => {
 
         var form = new frm.IncomingForm();
@@ -527,6 +603,7 @@ module.exports = (app) => {
     })
 }
 
+//When creating the directories for new post images, will mkdir if it does not already exist.
 function checkDir (dir) {
     return new Promise ((res, rej) => {
         fs.stat(dir, (err, stats) => {

@@ -4,6 +4,7 @@ var secrets = require('./boxofsecrets.j.js');
 var connection = mysql.createConnection(secrets.connection);
 var now = new Date();
 
+// Set up on a cronjob to run at midnight everynight
 connection.query('SELECT * FROM users WHERE deletion < ' + connection.escape(now), (err, results, fields) => {
     if (err) {console.log(err)}
     if (results != '') {

@@ -10,6 +10,13 @@ const secret = secrets.secret;
 
 const transporter = nodemailer.createTransport(secrets.transporter);
 
+/*
+    Right now secrets.transporter just points to a fake smtp
+    client instead of gmail, which is what I would have probably
+    eventually used. 
+*/
+
+//Send password reset email
 exports.reset = email => {
     var ptoken = uuidv4();
     var reset = authenticate.resPass(email, ptoken);
@@ -18,21 +25,22 @@ exports.reset = email => {
         var jwtoken = jwt.sign({ptoken : ptoken}, secret, {expiresIn: '1h'});
         var message = {
             from : 'vtaesmnsnk5vdlw2@ethereal.email',
-            to : resolved,
+            to : resolved.username,
             subject : 'Password Reset',
             html : '<a style="bold" href="localhost:8080/users/forgot/?ptoken=' + jwtoken + '"> Click Here to Reset Password </a>'
         }
         transporter.sendMail(message, (err) => {
             if (err) throw err;
-            console.log('Successfully sent ', message ,' to ', resolved);
+            console.log('Successfully sent ', message ,' to ', resolved.username);
         })
         return 0;
     }, reason => {
-        console.log(reason);
+        console.log('Reasoning', reason);
         return 99;
     }).catch(err => console.error(err))
 }
 
+//Verify password reset token
 exports.verToken = ptoken => {
     return new Promise ((res, rej) => {
         jwt.verify(ptoken, secret, (err, decoded) => {
@@ -52,15 +60,16 @@ exports.verToken = ptoken => {
     })
 }
 
+//Verify email after creation or updating email.
 exports.sendVerEmail = email => {
     return new Promise ((res, rej) => {
         var ptoken = uuidv4();
-        var jwtoken = jwt.sign({ptoken : ptoken}, secret, {expiresIn: '1h'});
+        var jwtoken = jwt.sign({ptoken : ptoken}, secret, {expiresIn: '60d'});
         var message = {
             from : 'tonyslist.com',
             to : email,
             subject : 'verify email',
-            html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Reset Password </a>'
+            html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Verify Email </a>'
         }
         transporter.sendMail(message, (err) => {
             if (err) rej(err);
@@ -70,6 +79,7 @@ exports.sendVerEmail = email => {
     })
 }
 
+//Verify verification email
 exports.verEmail = ptoken => {
     return new Promise ((res, rej) => {
         jwt.verify(ptoken, secret, (err, decoded) => {
@@ -89,6 +99,7 @@ exports.verEmail = ptoken => {
     })
 }
 
+//Send deletion confirmation
 exports.delete = (user, token) => {
     return new Promise ((res, rej) => {
         var jwtoken = jwt.sign({
@@ -117,6 +128,7 @@ exports.delete = (user, token) => {
     })
 }
 
+//Cancel the deletion through email
 exports.cancelDelete = token => {
     return new Promise ((res, rej) => {
         jwt.verify(token, secret, (err, decoded) => {

@@ -19,6 +19,8 @@ function advertmod() {
     console.log('advert called ');
 }
 
+//Format JSON data into actual inputs. Refer to /public/layouts/*.json 
+//to see what I'm working with here
 function populateFields(fields) {
     document.getElementById('title').innerHTML = fields.title;
     var root = document.getElementById('mod-body');
@@ -84,19 +86,19 @@ function closeModal(err) {
 }
 
 var showErr = (id, status) => {
-    console.log(id);
     if (status == 404) {
         var label = document.getElementById(id + 'Label');
         label.classList.add('input-error-label');
     }
 }
 
+//Dynamically load the form to change data
 function makeRequest(layout) {
     return new Promise((res, rej) => {
         var xhr = new XMLHttpRequest();
         var url = '/public/layouts/' + layout + ".json";
-
         xhr.onload = function() {
+            console.log(this.status);
             if (this.status == 200) {
                 res(this.responseText);
             } else if (this.status == 500) {
@@ -105,7 +107,6 @@ function makeRequest(layout) {
                 rej(this.status);
             }
         }
-
         xhr.open("GET", url, true);
         xhr.send();
     }) 
@@ -131,10 +132,8 @@ var verPass = () => {
     }
 }
 
-var verEmail = () => {
-
-}
-
+//At least 3 hours getting this to work at all, it works okay right now,
+//But there is definitely room to improve on both sides of the table.
 var subReq = () => {
     var xhr = new XMLHttpRequest();
     var data = new FormData();
@@ -151,7 +150,7 @@ var subReq = () => {
         if (this.readyState == 4 && this.status == 200) {
             closeModal();
             document.getElementById('success-message').style.display = 'block';
-            document.getElementById('success-message').innerHTML = 'Password Successfully Changed'
+            document.getElementById('success-message').innerHTML = 'Info Successfully Changed'
         } else if (this.readyState == 4 && this.status == 500) {
             console.log(this.responseText);
             console.log(this.status);

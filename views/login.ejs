@@ -15,7 +15,14 @@
                     <% if (passwordErr) { %>
                         <div class="pass-err">
                             <p>
-                                Error! Incorrect Email or Password
+                                <% if (passwordErr == 469) {%>
+                                    Password Reset Warrant Out
+                                <%} else if (passwordErr == 470) { %>
+                                    Please Verify Your Email Before Logging In
+                                <% } else { %>
+                                    Error! Incorrect Email or Password <%=passwordErr%>
+                                <% } %>
+
                             </p>
                         </div>
                     <%}%>

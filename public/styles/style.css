@@ -1,9 +1,19 @@
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
+}
+
+/*
+    This is very much a w.i.p. I spend too much time debugging the backend
+    to focus any real resources to styling. Eventually I would like to 
+    incorporate react or vue into this project. But that would be some time 
+    down the road from where I am now.
+*/
+
+li {
+    list-style: none;
 }
 
 .nav {
@@ -111,16 +121,18 @@ label {
 /* Index Stuff */
 
 .index-category-card {
-    width : 20%;
     position : relative;
-    float : right;
+    float : left;
+    margin: 25px;
+    width : 30%;
 }
 
 .main-article {
     width: 60%;
-    height: 300px;
+    height: 430px;
     padding: 25px;
     float: left;
+    clear: left;
 }
 
 .new-article-slide-box {
@@ -131,7 +143,8 @@ label {
 }
 
 .light-box {
-    background : #555;
+    background : url('/public/images/cartback.png') repeat;
+    background-color: #9a9a9a;
     box-shadow: inset 0 0 15px black;
     overflow: hidden;
 }
@@ -139,18 +152,19 @@ label {
 .top-article-slide {
     width : 40%;
     border-radius : 10px;
-    background : #999;
+    background : rgb(238, 238, 238);
     overflow : auto;
     position : relative;
     float : right;
-    padding : 10px;
-    margin : 10px -5%;
+    padding : 0 0 10px 0;
+    margin : 10px 10px;
     box-shadow:0 0 20px #222;
 }
 
-.article-slide-image {
+.article-slide-image img{
+    border-radius: 6px 0;
     max-width: 100%;
-    float: left;
+
 }
 
 .article-slide-img {
@@ -159,6 +173,22 @@ label {
 
 .top-article-slide-main {
     z-index: 3;
+}
+
+.article-slide-a {
+    text-decoration: none;
+    color: rgba(5, 104, 170, 0.877);
+}
+
+.article-slide-a:hover {
+    text-decoration: underline;
+}
+
+.top-article-image-lightbox {
+    height: 150px;
+    background: #333;
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
 }
 
 .img-header-desc {
@@ -176,11 +206,22 @@ label {
     font-weight: normal;
 }
 
+.index-lower-left {
+    float: left;
+    width: 60%;
+}
+
+.category-listing-cont {
+    width: 100%;
+    overflow: auto;
+}
+
 /* End Index Stuff Begin Account Stuff */
 
 .modify-user-info-card {
     width : 25%;
     float : left;
+    margin: 50px;
 }
 
 .modify-user-info-card-title {
@@ -189,14 +230,23 @@ label {
 
 
 .mod-modal {
-    width: 100%;
     display: none;
+    width: 100%;
+    height: 100%;
+    background: rgba(59, 59, 59, 0.62);
+    position: absolute;
+    z-index: 999;
+}
+
+.mod-modal-background {
+    margin-top: 15%;
 }
 
 .mod-modal-card {
     width: 40%;
     margin: auto;
     background: #fff;
+    box-shadow: 0 0 10px black;
 }
 
 .mod-modal-title {
@@ -219,8 +269,41 @@ label {
     color: red;
 }
 
+.modify-user-link {
+    color: #333;
+    padding: 10px;
+    font-size: 19px;
+    display: block;
+}
+
+.modify-user-link:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.post-postlist-edit {
+    text-decoration: none;
+    padding: 5px;
+    margin: 10px;
+    background: #37ff58
+}
+
 /*End Acct Stuff Begin Post Listing */
 
+.back-button {
+    position: absolute;
+    padding: 5px;
+    background: aliceblue;
+    margin: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: dodgerblue;
+    font-size: 25px;
+}
+
+.back-button::before {
+    content: "◀ ";
+}
 
 .post-detail {
     list-style : none;
@@ -251,7 +334,22 @@ label {
     display: none;
 }
 
+/* Adverts */
 
+.md-advert {
+    width: 60%;
+    float: right;
+}
+
+.md-advert-img {
+    width: 60%;
+    float: left;
+}
+
+.md-advert-desc {
+    width : 40%;
+    float: right;
+}
 
 /* Modal info */
 /*
@@ -458,7 +556,15 @@ label {
 }
 
 .price {
+    position: absolute;
+    top: 0;
+    padding: 5px;
+    background: #999;
+    border-radius: 6px 0;
+    color: #f2f2f2;
+    text-shadow: 1px 1px black;
     font-size: 25px;
+    box-shadow: inset 0 0 5px black;
 }
 
 .price::before {
