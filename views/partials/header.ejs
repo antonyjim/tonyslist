@@ -10,8 +10,11 @@
             <span class="title">tonyslist</span>
             <div class="nav-link-cont">
                 <a class="nav-link" href="/">Home</a>
-                <a class="nav-link" href="/sell/">Sell</a>
+                <a class="nav-link" href="/posts/add">Sell</a>
                 <a class="nav-link" href="/posts/">Posts</a>
+                <% if (auth.userlevel == 2) {%>
+                    <a class="nav-link" href="/news/add/">News</a>
+                <% } %>
                 <% if (auth.auth) { %>
                     <a class="nav-link" href="/account/?user=<%=auth.user%>">Account</a>
                     <a class="nav-link register" href="/logout/">Logout</a>

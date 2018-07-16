@@ -1,0 +1,19 @@
+{
+    "title" : "delete account",
+    "inputs" : [{
+        "type" : "email",
+        "name" : "email",
+        "id" : "email",
+        "label" : "verify email"
+    }, {
+        "type" : "password",
+        "name" : "pass",
+        "id" : "pass",
+        "label" : "verify password"
+    }, {
+        "type" : "hidden",
+        "name" : "deletion",
+        "id" : "deletion",
+        "label" : ""
+    }]
+}

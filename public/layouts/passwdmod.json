@@ -1,20 +1,28 @@
 {
     "title" : "change password",
-    "action" : "account/updinfo/passwd",
     "inputs" : [{
         "type" : "password",
-        "name" : "verNewPass",
-        "id" : "verNewPass",
-        "label" : "verify new password"
+        "name" : "oldPass",
+        "id" : "oldPass",
+        "label" : "old password",
+        "pattern" : "",
+        "otherAttr" : "",
+        "otherAct" : ""
     } , {
         "type" : "password",
         "name" : "newPass",
         "id" : "newPass",
-        "label" : "new password"
-    } , {
+        "label" : "new password",
+        "pattern" : "[a-z0-9]",
+        "otherAttr" : "onkeyup",
+        "otherAct" : "verPass()"
+    }, {
         "type" : "password",
-        "name" : "oldPass",
-        "id" : "oldPass",
-        "label" : "old password"
+        "name" : "verNewPass",
+        "id" : "verNewPass",
+        "label" : "verify new password",
+        "pattern" : "[a-z0-9]",
+        "otherAttr" : "onkeyup",
+        "otherAct" : "verPass()"
     }]
 }

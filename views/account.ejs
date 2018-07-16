@@ -1,9 +1,13 @@
 <% include partials/header %>
-
-<%= auth.user %>
+<input type="hidden" id="pid" value="<%= auth.user %>">
 <div id="error-box">
 
 </div>
+
+<div id="success-message">
+
+</div>
+
 <div class="modify-user-info-card card">
     <div class="modify-user-info-card-title card-title">
         manage account
@@ -11,12 +15,12 @@
     <div class="modify-user-info-card-body card-body">
         <ul>
             <li>
-                <span class="modify-user-link" onclick="passwdmod()">
+                <span class="modify-user-link" onclick="mod('passwdmod')">
                     Change Password
                 </span>
             </li>
             <li>
-                <span class="modify-user-link" onclick="emailmod()">
+                <span class="modify-user-link" onclick="mod('emailmod')">
                     Change Email
                 </span>
             </li>
@@ -26,7 +30,7 @@
                 </span>
             </li>
             <li>
-                <span class="modify-user-link" onclick="deletemod()">
+                <span class="modify-user-link" onclick="mod('delmod')">
                     Delete My Account
                 </span>
             </li>
@@ -54,10 +58,11 @@
 <div class="mod-modal" id="mod-modal">
     <div class="mod-modal-background">
         <div class="mod-modal-card card">
-            <span class="close" id="close" onclick="closeModal();">X</span>
             <div id="mod" class="mod-modal-card-title card-title">
-
+                    <h4 id="title" class="mod-modal-title"></h4>
+                    <span class="close" id="close" onclick="closeModal();">X</span>
             </div>
+            <div id="mod-error"></div>
             <div id="mod-body" class="mod-modal-card-body card-body">
 
             </div>
@@ -65,6 +70,7 @@
     </div>
 </div>
 
-
+<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 <script src="/public/scripts/account.js"></script>
 <% include partials/footer %>

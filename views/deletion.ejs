@@ -1,0 +1,14 @@
+<% include partials/header %>
+
+<% if (typeof(error) !== undefined && error.code == 200) { %>
+    <div class="success-message">
+        <%= error.message %>
+    </div>
+<% } else { %>
+    <div class="error-message">
+        <%= error %>
+    </div>
+<% } %>
+
+
+<% include partials/footer %>

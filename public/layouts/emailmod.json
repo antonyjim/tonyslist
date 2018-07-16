@@ -1,0 +1,14 @@
+{
+    "title" : "change email",
+    "inputs" : [{
+        "type" : "email",
+        "name" : "username",
+        "id" : "username",
+        "label" : "new email"
+    } , {
+        "type" : "password",
+        "name" : "pass",
+        "id" : "pass",
+        "label" : "verify password"
+    }]
+}

@@ -1,11 +1,11 @@
 var fs = require('fs');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
-var authenticate = require('./authenticate.js');
+var authenticate = require('./authenticate');
+var gr = require('./global_resources');
 var passwd = require('./passwd.js');
 var uuidv4 = require('uuid/v4');
 var frm = require('formidable');
-var morgan = require('morgan');
 var childProcess = require('child_process');
 var auth= {
     auth : false,
@@ -14,14 +14,12 @@ var auth= {
 },
 path = require('path'),
 password = 0;
-var token;
 
 module.exports = (app) => {
 
 
 
     //Middleware
-    //app.use(morgan(':url'));
     app.use(cookieParser());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: false}));
@@ -32,18 +30,20 @@ module.exports = (app) => {
             authedd.then (resolve => {
                 auth.auth = resolve.auth;
                 auth.user = resolve.user;
+                auth.userlevel = resolve.userlevel;
                 res.cookie('auth', resolve.cookie);
                 next();
             }, reason => {
                 auth.auth = false;
+                auth.userlevel = 0;
                 res.cookie('auth', null);
                 next();
             }).catch(err => {
                 console.log('Authedd.catch', err);
             })
         } else {
-            console.log('No token provided');
             auth.auth = false;
+            auth.userlevel = 0;
             next();
         }
     });
@@ -73,27 +73,13 @@ module.exports = (app) => {
         })
 
     });
-    
-    app.get('/addna', (req, res) => {
-        res.render('addna', {
-            title: 'Add National Account',
-            auth : auth
-        });
-    });
 
-    app.get('/users/register', (req, res) => {
-        res.render('users', {
-            title: 'User Info',
-            errlev: 0,
-            auth : auth
-        });
-    });
-
-    app.get('/add/addpost', (req, res) => {
+    app.get('/posts/add', (req, res) => {
         if (auth.auth) {
             res.render('addpost', {
                 title: "Add Post",
                 errlev : 0,
+                uuid : auth.user,
                 auth : auth
             })
         } else {
@@ -103,6 +89,14 @@ module.exports = (app) => {
         
     })
 
+    app.get('/users/register', (req, res) => {
+        res.render('users', {
+            title: 'User Info',
+            errlev: 0,
+            auth : auth
+        })
+    })
+    
     app.get('/login', (req, res) => {
         if (auth.auth) {
             res.redirect('/');
@@ -111,11 +105,26 @@ module.exports = (app) => {
                 title: "Login", 
                 passwordErr: undefined,
                 errlev: 0,
+                err : req.query,
                 auth : auth
             })
         }
     })
-
+    
+    app.get('/users/verify', (req, res) => {
+        if (req.query.ptoken) {
+            var verEmail = passwd.verEmail(req.query.ptoken);
+    
+            verEmail.then(resolved => {
+                res.redirect('/login?err=' + resolved)
+            }, reason => {
+                res.redirect('/login?err=' + reason);
+            }).catch(err => {res.redirect('/login?err=' + reason)})
+        } else {
+            res.redirect('/login?err=notoken');
+        }
+    })
+    
     app.get('/users/forgot', (req, res) => {
         if (req.query.ptoken) {
             var verPt = passwd.verToken(req.query.ptoken);
@@ -145,6 +154,32 @@ module.exports = (app) => {
         }
     })
 
+    app.get('/users/deletion/', (req, res) => {
+        if (req.query.deletion) {
+            authenticate.cancelDelete(req.query.deletion).then(resolved => {
+                res.render('deletion', {
+                    title : 'cancel delete',
+                    auth : auth,
+                    error : resolved
+                })
+            }, reason => {
+                res.render('deletion', {
+                    title : 'An error occured',
+                    auth : auth,
+                    error : reason
+                })
+            }).catch(err => {
+                res.render('deletion', {
+                    title : 'An error occured',
+                    auth : auth,
+                    error : err
+                })
+            })
+        } else {
+            res.redirect('/');
+        }
+    })
+    
     app.get('/logout', (req, res) => {
         res.cookie('auth', null);
         res.redirect(302, '/');
@@ -174,7 +209,7 @@ module.exports = (app) => {
         
     })
 
-    app.get('/sell', (req, res) => {
+    app.get('/posts/sell', (req, res) => {
         if (!auth.auth) {
             res.redirect(302, '/login');
         } else {
@@ -284,6 +319,7 @@ module.exports = (app) => {
     })
 
     //Post Requests
+
     app.post('/users/register', (req, res) => {  
         var newUser = {
             givenname: req.body.givenname,
@@ -294,18 +330,17 @@ module.exports = (app) => {
             userlevel: 1,
             pid: uuidv4()
         }
-
-
+    
+    
         var pro = new Promise ((resolve, reject) => {
             var add = authenticate.add(newUser);
             resolve(add);
         });
-
+    
         pro.then((value) => {
                 if (value == 0) {
                     res.render('addsucc', {
                         title: 'Success',
-                        password: password,
                         auth : auth
                     })
                 } else {
@@ -322,7 +357,7 @@ module.exports = (app) => {
             console.log(err);
         });
     });
-
+    
     app.post('/login', (req, res) => {
         if (auth.auth == true) {
             console.log('Already logged in');
@@ -338,35 +373,32 @@ module.exports = (app) => {
             
             init.then((results) => {
                     res.cookie('auth', results);
-                    console.log(req.cookies);
                     res.redirect(302, '/');
                 } , reason => {
-                    console.log(reason);
                     res.render ('login', {
                         title: "Error",
-                        passwordErr: 1,
+                        passwordErr: reason,
                         auth: auth
                     });
                 });
-
+    
             
         }});
-
+    
     app.post('/users/forgot', (req, res) => {
         var email = req.body.username;
         passwd.reset(email);
         res.redirect('/');
     })
-
+    
     app.post('/users/forgot/change', (req, res) => {
         var verPt = passwd.verToken(req.body.jwt);
-
+    
         verPt.then(resolved => {
             var f = authenticate.forcePass(req.body.pass, req.body.pid);
-
             f.then(resolved1 => {
                 console.log(resolved1);
-                res.redirect('/login');
+                res.redirect('/users/login');
             }, reason1 => {
                 console.log(reason1);
                 res.redirect('/users/forgot');
@@ -377,17 +409,55 @@ module.exports = (app) => {
         }).catch(err => {console.error(err)});
     })
 
-    app.post('/users/update', (req, res) => {
-        var updInfo = authenticate.updInfo(req.body);
+    app.post('/account/update/', (req, res) => {
+        if (!auth.auth) {
+            res.status(403); 
+        }
+        var form = new frm.IncomingForm();
 
-        updInfo.then(resolved => {
-            res.status(302);
+        var parse = new Promise ((reso, reje) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) {reje(err)}
+                else if (!fields) {reje(new gr.Error(467, 'Nothing Here!'))}
+                else {
+                    if (fields.newPass) {
+                        if (fields.newPass != fields.verNewPass) {
+                            reje(new gr.Error(466, 'Mismatched Passwords'))
+                        } else if (fields.newPass === fields.verNewPass) {
+                            delete fields.verNewPass;
+                            reso(fields);
+                        } else {
+                            reje(new gr.Error(463, 'Unknown'))
+                        }
+                    } else if (fields.username || fields.email) {
+                        reso(fields)
+                    } else {
+                        reje(new gr.Error(463, 'Not email or password'))
+                    }
+                }
+            })
+        })
+
+        parse.then(resolved => {
+            console.log(resolved);
+            var updateInfo = authenticate.updInfo(resolved);
+
+            updateInfo.then(resolved => {
+                res.status(200).send(resolved);
+            }, reason => {
+                console.log('Reasoning', reason);
+                res.sendStatus(reason);
+            }).catch(err => res.status(500).send(err))
         }, reason => {
-            res.status(403);
+            res.sendStatus(500)
+            console.log('The reason is ', reason)
+        }).catch(err => {
+            console.log(err);
         })
     })
 
     app.post('/addImage', (req, res) => {
+
         var form = new frm.IncomingForm();
         form.uploadDir = path.join(__dirname, '../public/images');
         var parse = new Promise ((reso, reje) => {
@@ -396,12 +466,12 @@ module.exports = (app) => {
                 var newPath = '/home/aj/Desktop/newnode/public/images/' + fields.post_pid;
                 var checking = checkDir(newPath);
 
-                checking.then(res => {
+                checking.then(resolved => {
 
                     for (let i = 0; i < Object.keys(files).length; i++) {
                         var tag = 'img' + (i + 1);
-                        fs.rename(files[tag].path, res + '/' + tag + '.jpg', (err) => {
-                            if (err) {throw err; reje(23)};
+                        fs.rename(files[tag].path, resolved + '/' + tag + '.jpg', (err) => {
+                            if (err) {throw err};
                         })
                     }
                     reso(fields);
@@ -424,14 +494,9 @@ module.exports = (app) => {
         parse.then(resit => {
             fields = resit;
             fields.pid = auth.user;
-            createDesk = fields.desk.split(' ');
-            if (createDesk.length > 15) {
-                createDesk.slice(-15);
-            }
             if (req.query.sub == 'true') {
                 fields.active = 1;
                 fields.created_on = new Date();
-                fields.shortdesk = createDesk.join(' ');
                 var path = '/home/aj/Desktop/newnode/public/images/' + fields.post_pid;
                 childProcess.exec('convert -thumbnail 250 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
                     if(err) throw err;
@@ -439,21 +504,20 @@ module.exports = (app) => {
             };
             var update = authenticate.updatePost(fields);
         
-                update.then (pu => {
-                    console.log('pu', pu)
-                    if (req.query.sub == 'true') {
-                        res.redirect(302, '/posts/?pid=' + pu);
-                    } else {
-                        console.log(req.query);
-                    }
+            update.then (resolved => {
+                if (req.query.sub == 'true') {
+                    res.redirect(302, '/posts/?pid=' + resolved);
+                } else {
+                    console.log(req.query);
+                }
 
-                    console.log('Success');
-                }, rej => {
-                   console.error(rej);
-                })
-                update.catch(err => {
-                    console.error(err);
-                })
+                console.log('Success');
+            }, reason => {
+                console.error(reason);
+            })
+            update.catch(err => {
+                console.error(err);
+            })
         }, rej => {
             console.log('Error: ', rej);
         }).catch(err => {
@@ -461,7 +525,7 @@ module.exports = (app) => {
         })
 
     })
-};
+}
 
 function checkDir (dir) {
     return new Promise ((res, rej) => {

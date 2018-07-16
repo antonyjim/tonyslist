@@ -1,5 +1,4 @@
-/*StyleSheet for app.js*/
-/* Global stuff */
+
 * {
     margin: 0;
     padding: 0;
@@ -196,9 +195,29 @@ label {
 
 .mod-modal-card {
     width: 40%;
+    margin: auto;
+    background: #fff;
 }
 
+.mod-modal-title {
+    position: absolute;
+    top: 18px;
+}
 
+.close {
+    position: absolute;
+    top: 18px;
+    right: 25px;
+    user-select : none;
+}
+
+.close:hover {
+    cursor: pointer;
+}
+
+.input-error-label {
+    color: red;
+}
 
 /*End Acct Stuff Begin Post Listing */
 

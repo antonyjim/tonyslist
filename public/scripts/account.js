@@ -1,73 +1,66 @@
-var ress = null;
-function closeModal(err) {
-    if (err) {
-        var errorBox = document.getElementById('error-box');
-        errorBox.innerHTML = err;
-    }
-    console.log('closed');
-    var modal = document.getElementById('mod-modal');
-    modal.style.display = "none";
-}
 
-function passwdmod() {
-    var f = makeRequest("passwdmod");
+
+function mod(file) {
+    var f = makeRequest(file);
 
     f.then(resolved => {
         openModal();
         var suc = JSON.parse(resolved);
         populateFields(suc);
     } , reason => {
-        console.log(reason);
         closeModal(reason);
     }).catch(err => {
-        console.log('There was an error');
+        console.log(err);
     }) 
 
-}
-
-function emailmod() {
-    console.log('email called');
 }
 
 function advertmod() {
     console.log('advert called ');
 }
 
-function deletemod() {
-    console.log('delete called');
-}
-
 function populateFields(fields) {
-    console.log(fields);
+    document.getElementById('title').innerHTML = fields.title;
     var root = document.getElementById('mod-body');
+    while (root.firstChild) {
+        root.removeChild(root.firstChild);
+    }
     var cont = document.createElement('div');
-    console.log(cont);
+    cont.id = 'mod-body-cont';
 
     for (let m in fields.inputs) {
         let i = document.createElement('div');
-        let j = document.createElement('input');
-        let k = document.createElement('label');
-        let l = document.createTextNode(fields.inputs[m].label);
+        let input = document.createElement('input');
+        let label = document.createElement('label');
+        let labelText = document.createTextNode(fields.inputs[m].label);
 
         i.classList.add('edit-field');
 
-        j.type = fields.inputs[m].type;
-        j.name = fields.inputs[m].name;
-        j.id = fields.inputs[m].id;
+        input.type = fields.inputs[m].type;
+        input.name = fields.inputs[m].name;
+        input.id = fields.inputs[m].id;
+        input.classList.add('user-info');
+        input.classList.add('newInfo');
 
-        k.for = fields.inputs[m].id;
+        if (fields.inputs[m].otherAttr) {
+            input.setAttribute(fields.inputs[m].otherAttr, fields.inputs[m].otherAct);
+        }
 
-        k.appendChild(l);
-        i.appendChild(j);
-        i.insertBefore(k);
-        cont.insertBefore(i);
+        label.for = fields.inputs[m].id;
+        label.id = fields.inputs[m].id + 'Label';
+
+        label.appendChild(labelText);
+        i.appendChild(label);
+        i.appendChild(input);
+        cont.appendChild(i);
     }
 
     var submit = document.createElement('button');
 
+    submit.setAttribute('onclick', 'subReq()')
     submit.type = 'button',
-    submit.action = 'subReq(' + fields.action + ');';
-    submit.value = 'save changes';
+    submit.classList.add('user-submit');
+    submit.innerHTML = 'save changes';
 
     cont.appendChild(submit);
     root.appendChild(cont);
@@ -80,15 +73,31 @@ function openModal() {
     console.log(modal);
 }
 
+function closeModal(err) {
+    if (err) {
+        var errorBox = document.getElementById('error-box');
+        errorBox.innerHTML = err;
+    }
+    document.getElementById('mod-error').style.display = 'none';
+    var modal = document.getElementById('mod-modal');
+    modal.style.display = "none";
+}
+
+var showErr = (id, status) => {
+    console.log(id);
+    if (status == 404) {
+        var label = document.getElementById(id + 'Label');
+        label.classList.add('input-error-label');
+    }
+}
+
 function makeRequest(layout) {
-    console.log(layout);
     return new Promise((res, rej) => {
         var xhr = new XMLHttpRequest();
         var url = '/public/layouts/' + layout + ".json";
 
-        xhr.onreadystatechange = function() {
-            console.log(this.status);
-            if (this.status == 200 || this.status == 304) {
+        xhr.onload = function() {
+            if (this.status == 200) {
                 res(this.responseText);
             } else if (this.status == 500) {
                 rej(500);
@@ -101,3 +110,62 @@ function makeRequest(layout) {
         xhr.send();
     }) 
 }
+
+var verPass = () => {
+    var newPass = document.getElementById('newPass');
+    var verNewPass = document.getElementById('verNewPass');
+    var errorBox = document.getElementById('passwd-match-err');
+
+    if (newPass.value != verNewPass.value) {
+        if (!errorBox) {
+            var div = document.createElement('div');
+            div.innerHTML = 'Passwords must match!';
+            div.id = 'passwd-match-err';
+    
+            verNewPass.parentNode.insertBefore(div, verNewPass.nextSibling);
+        } else if (errorBox.style.display == 'none') {
+            errBox.style.display = 'block'
+        }
+    } else if (newPass.value == verNewPass.value) {
+        document.getElementById('passwd-match-err').style.display = 'none';
+    }
+}
+
+var verEmail = () => {
+
+}
+
+var subReq = () => {
+    var xhr = new XMLHttpRequest();
+    var data = new FormData();
+
+    var inputs = document.getElementById('mod-body-cont').getElementsByTagName('input');
+    var id = document.getElementById('pid');
+
+    data.append('pid', id.value);
+    for (let m of inputs) {
+        data.append(m.name, m.value);
+    }
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            closeModal();
+            document.getElementById('success-message').style.display = 'block';
+            document.getElementById('success-message').innerHTML = 'Password Successfully Changed'
+        } else if (this.readyState == 4 && this.status == 500) {
+            console.log(this.responseText);
+            console.log(this.status);
+        } else if (this.readyState == 4 && this.status == 465) {
+            document.getElementById('mod-error').innerHTML = 'eMail Address already taken';
+        } else if (this.readyState == 4 && this.status == 466) {
+            document.getElementById('mod-error').innerHTML = 'This is your current email address';
+        } else {
+            console.log(this.status);
+        }
+    };
+
+    xhr.open('POST', '/account/update/', true);
+    xhr.send(data);
+
+}
+
