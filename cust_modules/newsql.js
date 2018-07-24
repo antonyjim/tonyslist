@@ -7,14 +7,30 @@ var connection = mysql.createConnection(secrets.connection);
 
 exports.getList = () => {
     return new Promise ((res, rej) => {
-        console.log('called')
         connection.query('SELECT * FROM news', (err, results, fields) => {
-            console.log(results);
-            if (err) {
-                console.log(err);
-            } else {
-                res(results);
-            }
+            if (err) {rej(err)}
+            res(results);
         })
     })
 }
+
+exports.updNews = newNews => {
+    return new Promise ((res, rej) => {
+        connection.query('SELECT * FROM news WHERE pid = ' + connection.escape(newNews.pid), (err, results, fields) => {
+            if (err) {rej(err)}
+            else if(results == '') {
+                connection.query('INSERT INTO news SET ?', newNews, (err, results, fields) => {
+                    if (err) {rej(err)}
+                    res(200);
+                })
+            } else {
+                connection.query('UPDATE news SET ? WHERE pid = ' + connection.escape(newNews.pid), newNews, (err, results, fields) => {
+                    if (err) {rej(err)}
+                    res(200);
+                })
+            }
+        })  
+    })
+}
+
+

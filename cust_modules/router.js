@@ -498,8 +498,7 @@ module.exports = (app) => {
                 console.log('Success');
             }, reason => {
                 console.error(reason);
-            })
-            update.catch(err => {
+            }).catch(err => {
                 console.error(err);
             })
         }, rej => {
