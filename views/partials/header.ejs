@@ -15,6 +15,20 @@
     </head>
     
     <body>
+        <div class="mod-modal" id="mod-modal">
+            <div class="mod-modal-background">
+                <div class="mod-modal-card card">
+                    <div id="mod" class="mod-modal-card-title card-title">
+                            <h4 id="title" class="mod-modal-title"></h4>
+                            <span class="close" id="close" onclick="closeModal();">X</span>
+                    </div>
+                    <div id="mod-error"></div>
+                    <div id="mod-body" class="mod-modal-card-body card-body">
+        
+                    </div>
+                </div>
+            </div>
+        </div>
         <nav class="nav">
             <a href="/" class="title">tonyslist</a>
             <div class="nav-link-cont">
@@ -29,3 +43,5 @@
                 <% } %>    
             </div>
         </nav>
+
+        <div class="error-box"></div>

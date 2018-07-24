@@ -1,6 +1,4 @@
-
-
-function mod(file) {
+var mod = (file) => {
     var f = makeRequest(file);
 
     f.then(resolved => {
@@ -15,13 +13,13 @@ function mod(file) {
 
 }
 
-function advertmod() {
+var advertmod = () => {
     console.log('advert called ');
 }
 
 //Format JSON data into actual inputs. Refer to /public/layouts/*.json 
 //to see what I'm working with here
-function populateFields(fields) {
+var populateFields = fields => {
     document.getElementById('title').innerHTML = fields.title;
     var root = document.getElementById('mod-body');
     while (root.firstChild) {
@@ -66,23 +64,21 @@ function populateFields(fields) {
 
     cont.appendChild(submit);
     root.appendChild(cont);
-
 }
 
-function openModal() {
+var openModal = () => {
     var modal = document.getElementById('mod-modal');
     modal.style.display = "block";
-    console.log(modal);
+    document.getElementById('mod-error').style.display = 'none';
 }
 
-function closeModal(err) {
+//Close any element, bind to spans with .close class
+var closeElement = (element, err) => {
     if (err) {
         var errorBox = document.getElementById('error-box');
         errorBox.innerHTML = err;
     }
-    document.getElementById('mod-error').style.display = 'none';
-    var modal = document.getElementById('mod-modal');
-    modal.style.display = "none";
+    document.getElementById(element).style.display = 'none';
 }
 
 var showErr = (id, status) => {
@@ -137,15 +133,12 @@ var verPass = () => {
 var subReq = () => {
     var xhr = new XMLHttpRequest();
     var data = new FormData();
-
     var inputs = document.getElementById('mod-body-cont').getElementsByTagName('input');
     var id = document.getElementById('pid');
-
     data.append('pid', id.value);
     for (let m of inputs) {
         data.append(m.name, m.value);
     }
-
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             closeModal();
@@ -162,9 +155,6 @@ var subReq = () => {
             console.log(this.status);
         }
     };
-
     xhr.open('POST', '/account/update/', true);
     xhr.send(data);
-
 }
-

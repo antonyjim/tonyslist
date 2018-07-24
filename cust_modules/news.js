@@ -128,7 +128,7 @@ router.post('/add', (req, res) => {
                 newsql.addNews(fields)
                 .then(resolved => {
                     if (req.query.sub == 'true') {
-                        res.redirect('/news/?pid=' + resolved)
+                        res.sendStatus(302);
                     } else {
                         res.sendStatus(200);
                     }
