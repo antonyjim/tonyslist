@@ -1,0 +1,14 @@
+<% include partials/header %>
+<% if (auth.userlevel === 2) {%>
+    <div class="add-news">
+            <a id="add-news-button" class="back-button" href="/news/add">add news</a>
+        </div>
+<% } %>
+
+<% console.log(auth.userlevel) %>
+<div class="current-news">
+    
+</div>
+
+
+<% include partials/footer %>

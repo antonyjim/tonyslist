@@ -2,7 +2,6 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
-var uuidv4 = require('uuid/v4');
 var passwd = require('./passwd.js');
 var secrets = require('./boxofsecrets.j.js');
 var connection = mysql.createConnection(secrets.connection);
@@ -132,16 +131,25 @@ exports.add = (newUser)=>{
 exports.auth = function(userData) {
     var entry = new Date;
     return new Promise(function (resolve, reject) {
-        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(userData.email), function (err, results, fields) {
+        var un = connection.escape(userData.email);
+        connection.query('SELECT * FROM users WHERE username = ' + un +' OR new_username = ' + un, function (err, results, fields) {
+            console.log(results);
             if (err) {
                 reject(err); 
             } else if (results != '') {
                 if (results[0].ptoken != '') {
                     reject(469);
-                } else if (results[0].email_reset != '') {
-                    reject(470);
                 } else if (results[0].active == 1) {
-                    var comp = new Promise(function (resolve, reject) {
+                    new Promise(function (resolve, reject) {
+                        var loginMsg = '';
+                        if (results[0].new_username != ' ' && userData.email != results[0].new_username) {
+                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {new_username : '', email_reset : ''}, (err, results, fields) => {
+                                if (err) {reject(err)};
+                                loginMsg = 'Your email has been reverted to what it used to be because you did not verify your new email.';
+                            })
+                        } else {
+                            reject(470);
+                        }
                         bcrypt.compare(userData.pass, results[0].pass, function (err, res) {
                             if (err) {reject(err)}
                             if (res) {
@@ -149,14 +157,13 @@ exports.auth = function(userData) {
                                     {lastlogin : entry, deletion : ''}, (err, results, fields) => {
                                     if (err) throw err;
                                 })
+                                results[0].loginMsg = loginMsg;
                                 resolve(results[0]);
                             }else {
                                 reject(403);
                             }
                         });
-                    });
-
-                    comp.then(function (res) {
+                    }).then(function (res) {
                         if (res.setup == 1) {
                             var payload = {
                                 user: res.pid,
@@ -174,13 +181,12 @@ exports.auth = function(userData) {
                             var token = jwt.sign(payload, secret, {
                                 expiresIn: '1h'
                             });
-                            reject({code : 472, user : results[0].pid})
+                            reject({code : 472, user : results[0].pid, jwt: token})
                         }
                        
                     }, function (rej) {
                         reject(rej);
-                    });
-                    comp.catch(reason => {
+                    }).catch(reason => {
                         console.error(reason);
                     })
                 } else if (results[0].active == 0) {
@@ -200,10 +206,10 @@ exports.auth = function(userData) {
 //Check the existence of a username from registration screen
 exports.checkExist = function (username) {
     return new Promise(function (resolve, reject) {
-        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(username), function (err, results, fields) {
+        connection.query('SELECT username, old_username FROM users WHERE username = ' + connection.escape(username), function (err, results, fields) {
             if (err) {
                 throw err;
-            } else if (results[0].username == username) {
+            } else if (results[0].username == username || results[0].username == username) {
                 resolve(0);
             } else {
                 reject (1)
@@ -288,18 +294,12 @@ exports.checkToken = token => {
 }
 
 //Insert password reset token from passwd module
-exports.resPass = (email, ptoken) => {
+exports.resPass = (pid, ptoken) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM users where username = '+ connection.escape(email), (err, results, fields) => {
-            if (err) rej(err)
-            else if (results == '') {
-                rej(404);
-            } else {
-                connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(email), {ptoken : ptoken}, (err, updates, fields) => {
-                    if (err) rej (err);
-                    res(results[0]);
-                })
-            }   
+        connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), ptoken, (err, updates, fields) => {
+            if (err) rej (err);
+            console.log(updates);
+            res(200);
         })
     })
 } 
@@ -336,9 +336,14 @@ exports.forcePass = (pass, pid) => {
 //Enter in the email verification
 exports.verEmail = (ptoken, pid) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM users WHERE email_reset = ' + connection.escape(ptoken), (err, results, fields) => {
+        connection.query('SELECT pid, username FROM users WHERE email_reset = ' + connection.escape(ptoken), (err, results, fields) => {
                 if (err) rej(err);
-                connection.query("UPDATE users SET email_reset = '' WHERE pid = " + connection.escape(results[0].pid), (err, results, fields) => {
+                var update = {
+                    email_reset : '',
+                    new_username : '',
+                    username : results[0].new_username
+                }
+                connection.query("UPDATE users SET ? WHERE pid = " + connection.escape(results[0].pid), update, (err, results, fields) => {
                     if (err) rej(err);
                     res(200)
                 })
@@ -374,7 +379,7 @@ exports.updInfo = (info) => {
                     bcrypt.compare(info.pass, results[0].pass, (err, compared) => {
                         if (err) rej(403);
                         else if (compared) {
-                            connection.query('SELECT * FROM users WHERE username = ' + connection.escape(info.username), (err, results, fields) => {
+                            connection.query('SELECT pid FROM users WHERE username = ' + connection.escape(info.username), (err, results, fields) => {
                                 if (err) {rej(err)}
                                 else if (results != '') {
                                     if (results[0].pid == info.pid) {
@@ -384,11 +389,18 @@ exports.updInfo = (info) => {
                                     }
                                 }
                                 else if (results == '') {
-                                    var updateInfo = {username : info.username};
-                                    connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(info.pid), updateInfo, (err, results, fields) => {
-                                        if (err) {rej(err)}
-                                        else {res(200)}
-                                    })
+                                    passwd.sendVerEmail(info).then(resolved => {
+                                        var updateInfo = {
+                                            new_username : info.username
+                                        };
+                                        connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(info.pid), updateInfo, (err, results, fields) => {
+                                            if (err) {rej(err)}
+                                            else {res(200)}
+                                        })
+                                    }, reason => {
+                                        rej(reason)
+                                    }).catch(err => {rej(err.code)})
+                                    
                                 } else {
                                     rej(500);
                                 }
@@ -451,6 +463,7 @@ exports.cancelDelete = token => {
 
 //Update post details from account menu
 exports.updatePost = data => {
+    console.log(data);
     return new Promise ((res, rej) => {
         connection.query('SELECT * FROM post WHERE post_pid = ' + connection.escape(data.post_pid), (err, results, fields) => {
             if (err) {throw err};
@@ -475,7 +488,7 @@ exports.updatePost = data => {
 exports.getPost = (post_pid) => {
     return  new Promise ((res, rej) => {
         var j = new Promise((ress, rejj) => {
-            connection.query('SELECT post, post_pid, desk, price, title, pid, contact, zip FROM post WHERE post_pid = ?', post_pid, (err, results, fields) => {
+            connection.query('SELECT post, post_pid, desk, price, title, pid, contact, zip, active FROM post WHERE post_pid = ?', post_pid, (err, results, fields) => {
                 if (err) {rej(err)};
                 if (results == '') {
                     rejj(0);
@@ -483,7 +496,6 @@ exports.getPost = (post_pid) => {
                     var seen = {last_viewed : new Date()}
                     connection.query('UPDATE post SET ? WHERE post_pid = ' + connection.escape(results[0].post_pid), seen, (err, results, fields) => {
                         if (err) console.log(err);
-                        console.log(results);
                     })
                     ress(results);
                 }
@@ -533,8 +545,7 @@ exports.getList = (conditions) => {
     } else {
         var cond = 'active = 1';
     }
-    
-    console.log(cond);
+
     var sql = 'SELECT title, desk, zip, post, post_pid, price FROM post WHERE ' + cond + ' ORDER BY created_on';
     //var old = `'SELECT title, desk, zip, post, post_pid, price FROM post WHERE ? ORDER BY created_on', conditions,`
     return new Promise ((res, rej) => {
@@ -548,9 +559,21 @@ exports.getList = (conditions) => {
 //List posts associated with account in the /account menu
 exports.getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT title, desk, zip, post, post_pid, pid, shortdesk, price FROM post WHERE ?', conditions, (err, results, fields) => {
+        connection.query('SELECT title, desk, zip, post, post_pid, pid, price FROM post WHERE ?', conditions, (err, results, fields) => {
             if (err) rej(err);
             res(results);
+        })
+    })
+}
+
+//Search
+exports.searchPosts = conditions => {
+    return new Promise ((res, rej) => {
+        var query = connection.escape('%' + conditions + '%');
+        connection.query('SELECT title, zip, post, post_pid, price FROM post WHERE desk LIKE ' + query, (err, results, fields) => {
+            if (err) {rej(err)}
+            else if (results == '') {rej(404)}
+            else {res(results)}
         })
     })
 }

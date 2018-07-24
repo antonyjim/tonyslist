@@ -16,16 +16,13 @@
     
     <body>
         <nav class="nav">
-            <span class="title">tonyslist</span>
+            <a href="/" class="title">tonyslist</a>
             <div class="nav-link-cont">
-                <a class="nav-link" href="/">Home</a>
                 <a class="nav-link" href="/posts/add">Sell</a>
                 <a class="nav-link" href="/posts/">Posts</a>
-                <% if (auth.userlevel == 2) {%>
-                    <a class="nav-link" href="/news/add/">News</a>
-                <% } %>
+                <a class="nav-link" href="/news/">News</a>
                 <% if (auth.auth) { %>
-                    <a class="nav-link" href="/account/?user=<%=auth.user%>">Account</a>
+                    <a class="nav-link" href="/account/">Account</a>
                     <a class="nav-link register" href="/logout/">Logout</a>
                 <% } else { %>
                     <a class="nav-link" href="/login/">Sign in or Register</a>

@@ -4,7 +4,8 @@
         <div class="card-title post-sort-card-title">
             filter
         </div>
-        <form onsubmit="filter();">
+            <input type="text" name="search" id="search" class="user-info search" placeholder="search">
+            <button type="button" id="search-button" onclick="search()" class="user-submit">Search</button>
             <div class="category-sort-cont">
                 <% var n = [] %>
                 <% for(let j in post) { %>
@@ -12,15 +13,15 @@
                     <label class="category-sort-label check-form-label" for="<%=post[j].post%>">
                         <%=post[j].post%>
                     </label>
-                    <input type="checkbox"class="category-sort" id="<%=post[j].post%>" value="<%=post[j].post%>" checked>
+                    <input type="checkbox" class="category-sort" id="<%=post[j].post%>" value="<%=post[j].post%>" onchange="filterCat()" checked><br>
                 <% }} %>
             </div>
-        
-        </form>
     </div>
     <div class="post-cont">
         <% for (let m of post) { %>
             <div class="post-postslist card">
+                <input type="hidden" class="post_pid" value="<%=m.post_pid%>">
+                <input type="hidden" class="category" value="<%=m.post%>">
                 <div class="post-thmb-cont">
                         <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
                 </div>
@@ -30,7 +31,7 @@
                 </a>
                 <div class="post-postlist-desc-cont">
                         <div class="post-postslits-short">
-                                <%=m.shortdesk%>
+
                         </div>
                         <div class="price">
                             <%=m.price%>
@@ -40,5 +41,8 @@
         <% } %>
     </div>
 </div>
+
+<script src="/public/scripts/ajax.js"></script>
+<script src="/public/scripts/postlist.js"></script>
 
 <% include partials/footer %>

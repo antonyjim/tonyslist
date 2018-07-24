@@ -1,6 +1,6 @@
 <% include partials/header %>
 
-<div class="add-post-card">
+<div class="add-post-card" onload="checkRadio()">
         <div class="card-title add-post-card-bg">
             edit a post
         </div>
@@ -30,33 +30,43 @@
                         <label class="check-form-label" for="cars">
                             cars and trucks
                         </label>
-                        <input id="cars" name="post" type="radio" class="check-form-radio" value="cars"><br>
+                        <input id="cars" name="post" type="radio" class="category check-form-radio" value="cars"><br>
             
                         <label class="check-form-label" for="boats">
                             boats and watercraft
                         </label>
-                        <input id="boats" name="post" type="radio" class="check-form-radio" value="boats"><br>
+                        <input id="boats" name="post" type="radio" class="category check-form-radio" value="boats"><br>
             
                         <label class="check-form-label" for="collect">
                             collectibles
                         </label>
-                        <input id="collect" name="post" type="radio" class="check-form-radio" value="collect"><br>
+                        <input id="collect" name="post" type="radio" class="category check-form-radio" value="collect"><br>
             
                         <label class="check-form-label" for="electronics">
                             electronics
                         </label>
-                        <input id="electronics" name="post" type="radio" class="check-form-radio" value="electronics"><br>
+                        <input id="electronics" name="post" type="radio" class="category check-form-radio" value="electronics"><br>
             
                         <label class="check-form-label" for="husapp">
                             household appliances
                         </label>
-                        <input id="husapp" name="post" type="radio" class="check-form-radio" value="husapp"><br>
+                        <input id="husapp" name="post" type="radio" class="category check-form-radio" value="husapp"><br>
             
                         <label class="form-label" for="contact">
                             contact phone 
                         </label><br>
                         <input id="contact" class="user-info" type="text" name="contact" value="<%=post.contact%>"><br>
             
+                        <label class="check-form-label" for="active1">
+                            active
+                        </label>
+                        <input id="active1" class="active user-info" type="radio" name="active" value="1"><br>
+
+                        <label class="check-form-label" for="active0">
+                            inactive
+                        </label>
+                        <input id="active0" class="active user-info" type="radio" name="active" value="0"> <br>
+
                         <label class="form-label" for="img">
                             image upload
                         </label><br>
@@ -67,7 +77,7 @@
                         
                     
                     <div class="submit-buttons">
-                            <input class="user-submit" type="submit" value="list it!">
+                            <button class="user-submit" onclick="del();" type="button">delete</button>
                             <button class="user-submit" onclick="save();" type="button">save</button>
                     </div>
 
@@ -91,13 +101,13 @@
         </div>
     </div>
     <script>
-    function fillCat() {
-        var category = '<%=post.post%>';
-        var radio = document.getElementById(category);
-        radio.checked = true;
-        console.log(radio);
-        return 0;
+    var values = {
+        category : '<%=post.post%>',
+        active : 'active' + '<%=post.active%>'
     }
+
+    document.getElementById(values.category).checked = true;
+    document.getElementById(values.active).checked = true;
 
     function queryfy(obj) {
         if (typeof(obj) != 'object') {
@@ -121,11 +131,26 @@
         iframe.src = bareframe;
     }
 
-    function save(j) {
-        if (j && j.checked == true) {var f = j.value} else {
-        var f = 0};
+    function save() {
+        var f = 0;       
         var iframe = document.getElementById('preview');
-        var id = document.getElementById('post_pid'),
+        var id = document.getElementById('post_pid');
+        
+        //Get category value
+        var j = document.querySelectorAll('.category');
+        for (let m in j) {
+            if (j[m].checked) {
+                f = j[m].value;
+            }
+        }
+
+        var k = document.querySelectorAll('.active');
+        for (let m in k) {
+            if (k[m].checked) {
+                g = k[m].value;
+            }
+        }
+
         formData = new FormData(),
             title = document.getElementById('title'),
             zip = document.getElementById('zip'),
@@ -133,7 +158,8 @@
             desk = document.getElementById('desk'),
             contact = document.getElementById('contact'),
             post_pid = document.getElementById('post_pid'),
-            post = f
+            post = f,
+            active = g
         ;
 
         var  images = document.querySelectorAll('.input');

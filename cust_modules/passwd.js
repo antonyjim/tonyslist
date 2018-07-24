@@ -18,11 +18,13 @@ const transporter = nodemailer.createTransport(secrets.transporter);
 
 //Send password reset email
 exports.reset = email => {
-    var ptoken = uuidv4();
+    var ptoken = {
+        ptoken : uuidv4()
+    }
     var reset = authenticate.resPass(email, ptoken);
 
     reset.then (resolved => {
-        var jwtoken = jwt.sign({ptoken : ptoken}, secret, {expiresIn: '1h'});
+        var jwtoken = jwt.sign(ptoken, secret, {expiresIn: '1h'});
         var message = {
             from : 'vtaesmnsnk5vdlw2@ethereal.email',
             to : resolved.username,
@@ -61,21 +63,29 @@ exports.verToken = ptoken => {
 }
 
 //Verify email after creation or updating email.
-exports.sendVerEmail = email => {
+exports.sendVerEmail = info => {
     return new Promise ((res, rej) => {
-        var ptoken = uuidv4();
-        var jwtoken = jwt.sign({ptoken : ptoken}, secret, {expiresIn: '60d'});
-        var message = {
-            from : 'tonyslist.com',
-            to : email,
-            subject : 'verify email',
-            html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Verify Email </a>'
+        var ptoken = {
+            email_reset: uuidv4()
         }
-        transporter.sendMail(message, (err) => {
-            if (err) rej(err);
-            res(ptoken);
-            console.log('Successfully sent ', message ,' to ', email);
-        })
+
+        authenticate.resPass(info.pid, ptoken).then(resolved => {
+            var jwtoken = jwt.sign(ptoken, secret, {expiresIn: '60d'});
+            var message = {
+                from : 'tonyslist.com',
+                to : info.username,
+                subject : 'verify email',
+                html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Verify Email </a>'
+            }
+            transporter.sendMail(message, (err) => {
+                if (err) rej(err);
+                res(ptoken);
+                console.log('Successfully sent ', message ,' to ', info.username);
+            })
+        }, reason => {
+            rej(reason);
+        }).catch(err => {rej(err.code)})
+       
     })
 }
 

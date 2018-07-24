@@ -86,6 +86,22 @@ label {
     cursor: default;
 }
 
+.err-cont {
+    padding: 50px;
+}
+
+.err-header {
+    font-size: 80px;
+    float: left;
+}
+
+.err-msg {
+    font-size: 30px;
+    float: left;
+    padding-top: 45px;
+    padding-left : 20px;
+}
+
 .card {
     position: relative;
     box-shadow : 0px 0px 25px #929292;
@@ -352,18 +368,16 @@ label {
 }
 
 /* Modal info */
-/*
+
 .login-modal {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    background: rgb(0, 0, 0, .9);
+    padding: 150px;
+    background-color: #3a5c75;
+    background-image: url(https://www.transparenttextures.com/patterns/brushed-alum.png);
 }
-*/
+
 .modal-card {
-    width: 30%;
+    width: 40%;
+    min-width: 430px;
     overflow: auto;
     background: white;
     animation-name: zoom;
@@ -372,9 +386,9 @@ label {
 }
 
 .modal-header {
-    background: darkolivegreen;
+    background: #2a73b8;
     color: white;
-    text-shadow: #555;
+    text-shadow: 1px 1px 3px black;
     padding: 10px 15px;
     font-size: 26px;
 }
@@ -399,6 +413,9 @@ label {
 
 .login-info {
     width: 80%;
+    outline: none;
+    border: none;
+    border-bottom: solid 2px rgba(5, 104, 170, 0.877);
 }
 
 .login-submit {
