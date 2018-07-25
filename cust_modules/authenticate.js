@@ -559,9 +559,16 @@ exports.getList = (conditions) => {
 //List posts associated with account in the /account menu
 exports.getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT title, desk, zip, post, post_pid, pid, price FROM post WHERE ?', conditions, (err, results, fields) => {
+        connection.query('SELECT title, desk, zip, post, post_pid, pid, price FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
             if (err) rej(err);
-            res(results);
+            var returns = {
+                posts: results
+            }
+            connection.query('SELECT * FROM news WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+                if (err) rej(err);
+                returns.news = results;
+                res(returns)
+            })
         })
     })
 }

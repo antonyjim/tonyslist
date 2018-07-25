@@ -1,13 +1,16 @@
 var save = (sub) => {
     var data = new FormData();
-    var userInfo = querySelectorAll('.user-info');
-    var images = querySelectorAll('.input');
+    var userInfo = document.querySelectorAll('.user-info');
+    var images = document.querySelectorAll('.input');
     for (let m in userInfo) {
-        data.append(userinfo[m].name, userInfo[m].value);
+        data.append(userInfo[m].name, userInfo[m].value);
     }
-    for (let m in images) {
-        data.append(images[m].name, images[m].files[0]);
+    if (images.length > 0) {
+        for (let m of images) {
+            data.append(m.name, m.files[0]);
+        }
     }
+  
         data.append('pid', document.getElementById('pid').value);
     if (sub) {
         var url = '/news/add/?sub=true';
@@ -22,10 +25,8 @@ var save = (sub) => {
             closeElement('mod-modal', 500);
         } else if (this.staus == 403) {
             window.href = ('/login');
-        } else if (this.status == 0) {
-            console.log('Waiting...');
-        } else {
-            closeElement('mod-modal', 500);
+        }else {
+            console.log(this.status);
         }
     }
 
@@ -35,7 +36,7 @@ var save = (sub) => {
 
 var postRequest = (data, url, cb) => {
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange(cb);
+    xhr.onreadystatechange = cb;
     xhr.open('POST', url, true);
     xhr.send(data);
 }

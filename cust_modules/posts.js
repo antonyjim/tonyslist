@@ -89,7 +89,7 @@ router.get('/', (req, res) => {
 //Create a new post
 router.get('/add', (req, res) => {
     if (auth.auth) {
-        res.render('addpost', {
+        res.render('postadd', {
             title: "Add Post",
             errlev : 0,
             uuid : auth.user,
@@ -113,7 +113,7 @@ router.get('/edit/', (req, res) => {
 
         f.then(resolved => {
             if (resolved.pid == auth.user) {
-                res.render('edit', {
+                res.render('postedit', {
                     title : 'edit post',
                     post : resolved,
                     auth : auth

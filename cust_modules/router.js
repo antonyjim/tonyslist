@@ -189,16 +189,19 @@ module.exports = (app) => {
         if (auth.auth) {
             authenticate.getAcctPost({pid : auth.user})
             .then (resolved => {
+                var news = null;
                 res.render('account', {
                     title : 'Account',
-                    post : resolved,
-                    auth : auth
+                    post : resolved.posts,
+                    auth : auth,
+                    news : resolved.news
                 }
                 )}, rejected => {
                 res.render('account', {
                     title : 'No posts found',
                     post : {title : 'No posts found'},
-                    auth : auth
+                    auth : auth,
+                    news: resolved.news
                 }) 
             }).catch (err => {
                 console.log(err)

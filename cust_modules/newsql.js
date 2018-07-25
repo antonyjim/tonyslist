@@ -5,11 +5,15 @@ var uuidv4 = require('uuid/v4');
 var secrets = require('./boxofsecrets.j.js');
 var connection = mysql.createConnection(secrets.connection);
 
-exports.getList = () => {
+exports.getList = conditions => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM news', (err, results, fields) => {
+        connection.query('SELECT * FROM news WHERE ?', conditions, (err, results, fields) => {
             if (err) {rej(err)}
-            res(results);
+            else if (results == '') {
+                rej(404);
+            } else {
+                res(results);
+            }
         })
     })
 }
@@ -17,7 +21,7 @@ exports.getList = () => {
 exports.updNews = newNews => {
     return new Promise ((res, rej) => {
         connection.query('SELECT * FROM news WHERE pid = ' + connection.escape(newNews.pid), (err, results, fields) => {
-            if (err) {rej(err)}
+            if (err) {console.log(err);rej(err)}
             else if(results == '') {
                 connection.query('INSERT INTO news SET ?', newNews, (err, results, fields) => {
                     if (err) {rej(err)}

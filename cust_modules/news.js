@@ -1,10 +1,11 @@
 var express = require("express");
 var authenticate = require("./authenticate");
 var newsql = require("./newsql");
-var uuidv4 = require('uuid/v4');
+var uuid = require('uuid/v4');
 var frm = require('formidable');
 var fs = require('fs');
 var childProcess = require('child_process');
+var path = require('path');
 var router = express.Router();
 var auth = {};
 router.use((req, res, next) => {
@@ -34,13 +35,17 @@ router.use((req, res, next) => {
 
 router.get('/', (req, res) => {
     if(req.query.pid) {
-        newsql.getNews(pid)
+        console.log(req.query.pid);
+        newsql.getList({
+            pid : req.query.pid
+        })
         .then(resolved => {
+            console.log(resolved);
             res.render('newspost', {
                 title: 'News',
                 auth: auth,
-                news : resolved
-            })
+                news : resolved[0]
+            }) 
         }, reason => {
             res.render('404', {
                 title: '404 Error',
@@ -53,28 +58,31 @@ router.get('/', (req, res) => {
                 error: err
             })
         })
-    }
-    newsql.getList()
-    .then(resolved => {
-            res.render('news', {
-                title : 'News',
-                auth : auth,
-                news : resolved
-            })
-        }, reason => {
+    } else {
+        newsql.getList({
+            active: 1
+        })
+        .then(resolved => {
+                res.render('news', {
+                    title : 'News',
+                    auth : auth,
+                    news : resolved
+                })
+            }, reason => {
+                res.render('500', {
+                    title : '500 Server Error',
+                    auth : auth,
+                    error : reason
+                })
+            }).catch(err => {
+            console.log(err)
             res.render('500', {
                 title : '500 Server Error',
                 auth : auth,
-                error : reason
+                error : err
             })
-        }).catch(err => {
-        console.log(err)
-        res.render('500', {
-            title : '500 Server Error',
-            auth : auth,
-            error : err
         })
-    })
+    }
 })
 
 router.get('/add', (req, res) => {
@@ -90,6 +98,56 @@ router.get('/add', (req, res) => {
     }
 })
 
+router.get('/edit', (req, res) => {
+    if (!req.query.pid) {
+        res.redirect('/account');
+    } else {
+        newsql.getList({pid: req.query.pid})
+        .then(resolved => {
+            res.render('newsedit', {
+                title: 'Edit News',
+                auth: auth,
+                news: resolved[0]
+            })
+        }, reason => {
+            res.render('404', {
+                title: '404 Server Error',
+                auth: auth,
+                error: reason
+            })
+        }).catch(err => {
+            res.render('500', {
+                title: 'Internal Server Error',
+                auth: auth,
+                error: err
+            })
+        })
+    }
+})
+
+router.get('/preview', (req, res) => {
+    if (!req.query.pid) {
+        res.render('newspreview', {
+            news : ''
+        })
+    } else {
+        newsql.getList({pid: req.query.pid})
+        .then(resolved => {
+            res.render('newspreview', {
+                news: resolved[0]
+            })
+        }, reason => {
+            res.render('newspreview', {
+                news: ''
+            })
+        }).catch(err => {
+            res.render('newspreview', {
+                news: ''
+            })
+        })
+    }
+})
+
 //POST requests
 
 router.post('/add', (req, res) => {
@@ -97,6 +155,7 @@ router.post('/add', (req, res) => {
         res.sendStatus(403);
     } else {
         let form = new frm.IncomingForm();
+        form.uploadDir = path.join(__dirname, '../public/images');
         new Promise((reso, reje) => {
             form.parse(req, (err, fields, files) => {
                 if (err) {reje(500)}
@@ -110,32 +169,53 @@ router.post('/add', (req, res) => {
                                 if (err) {throw err};
                             })
                         }
-                        reso(fields);
+                        var data = {
+                            pid : fields.pid,
+                            title : fields.title,
+                            body : fields.body,
+                            owner : auth.user
+                        }
+                        reso(data);
+                    }, reason => {
+                        rej(reason);
+                    }).catch(err => {
+                        console.log(err);
+                        rej(err.errno);
                     })
-                }
-            }).then(resit => {
-                fields = resit;
-                fields.pid = auth.user;
-                if(req.query.sub == 'true') {
-                    fields.active = 1;
-                    fields.createdOn = new Date();
-                    let path = '/home/aj/Desktop/newnode/public/news/images/' + fields.post_pid;
-                    childProcess.exec('convert -thumbnail 500 ' + path + '/img1.jpg', (err, stdout, stderr) => {
-                        if (err) {throw err;}
-                    })
-                };
-
-                newsql.addNews(fields)
-                .then(resolved => {
-                    if (req.query.sub == 'true') {
-                        res.sendStatus(302);
-                    } else {
-                        res.sendStatus(200);
+                } else {
+                    var data = {
+                        pid : fields.pid,
+                        title : fields.title,
+                        body : fields.body,
+                        owner : auth.user,
+                        createdOn : new Date()
                     }
-                }, reason => {
-                    res.sendStatus(reason);
-                }).catch(err => {console.log(err); res.sendStatus(500)})
+                    reso(data);
+                }
             })
+        }).then(resit => {
+            fields = resit;
+            fields.pid = auth.user;
+            if(req.query.sub == 'true') {
+                fields.active = 1;
+                fields.createdOn = new Date();
+                let path = '/home/aj/Desktop/newnode/public/news/images/' + fields.post_pid;
+                childProcess.exec('convert -thumbnail 500 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
+                    if (err) {throw err;}
+                })
+            };
+
+            newsql.updNews(fields)
+            .then(resolved => {
+                console.log(resolved);
+                if (req.query.sub == 'true') {
+                    res.sendStatus(302);
+                } else {
+                    res.sendStatus(resolved);
+                }
+            }, reason => {
+                res.sendStatus(reason);
+            }).catch(err => {res.sendStatus(500)})
         })
         
     }
@@ -158,4 +238,8 @@ function checkDir (dir) {
             }
         })
     })
+}
+
+var uuidv4 = () => {
+    return uuid().slice(0, 7)
 }

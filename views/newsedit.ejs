@@ -2,7 +2,7 @@
 
 <div class="add-post-card">
         <div class="card-title add-post-card-bg">
-            more news
+            edit news
         </div>
         <div class="card-body">
             <form method="POST" action="/news/add" enctype="multipart/form-data">
@@ -10,7 +10,7 @@
                 <label class="form-label" for="title">
                     title
                 </label> <br>
-                <input id="title" class="user-info" type="text" name="title"><br>
+                <input id="title" class="user-info" type="text" name="title" value="<%=news.title%>"><br>
     
                 <label class="form-label" for="img">
                     image upload
@@ -20,13 +20,13 @@
                 </div>
                 <button id="addimg" class="user-submit" onclick="addInput();" type="button">Add</button><br>
                 <div class="submit-buttons">
-                    <input type="hidden" value="<%=uuid%>" name="pid" id="pid">
+                    <input type="hidden" value="<%=news.pid%>" name="pid" id="pid">
                     <button class="user-submit" onclick="save();" type="button">save</button>
                     <button class="user-submit" onclick="save(sub);" type="button">submit</button>
                 </div>
               </div>
             <div class="preview-container">
-                <iframe class="preview-iframe" id="preview" src="/preview"></iframe>
+                <iframe class="preview-iframe" id="preview" src="/news/preview"></iframe>
             </div>
     
             <div class="description-text-box">
@@ -34,7 +34,7 @@
                     description
                 </label><br>
     
-                <textarea id="body" class="user-info desk-text" type="text" name="body" rows="8" cols="70" required></textarea>
+                <textarea id="body" class="user-info desk-text" type="text" name="body" rows="8" cols="70" required><%=news.body%></textarea>
             </div>
             </form>
             <div class="clr"></div>

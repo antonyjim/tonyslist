@@ -134,11 +134,10 @@
         formData.append('post_pid', post_pid.value);
         formData.append('post', f);
         
-        if (images.length > 1) {
-            for (let m of images) {
+        for (let m of images) {
             formData.append(m.name, m.files[0]);
         }
-        }
+        
         
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = (err) => {
