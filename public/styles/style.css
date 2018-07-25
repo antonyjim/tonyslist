@@ -332,7 +332,17 @@ label {
     font-size: 25px;
 }
 
-.back-button::before {
+.button {
+    padding: 5px;
+    background: aliceblue;
+    margin: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: dodgerblue;
+    font-size: 25px;
+}
+
+.back::before {
     content: "◀ ";
 }
 
@@ -506,6 +516,59 @@ label {
 
 .clr {
     clear: both;
+}
+
+/* News Listing */
+.current-news {
+    width: 80%;
+    margin: auto;
+}
+
+.news-block {
+    width: 90%;
+    height: 400px;
+    margin: auto;
+}
+
+.news-img-cont {
+    float: left;
+}
+
+.news-img {
+    max-height: 370px;
+    min-height: 300px;
+}
+
+.news-body {
+    float: left;
+    padding: 70px;
+    overflow: auto;
+}
+
+.news-para {
+    font-size: 18px;
+    width: 50%;
+}
+
+.news-readmore {
+    float: right;
+}
+
+.news-readmore-button {
+    padding: 5px;
+    background: aliceblue;
+    margin: 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: dodgerblue;
+    font-size: 25px;
+}
+
+.add-news::before {
+    content : "+";
+    font-size: 25px;
+    color: dodgerblue;
+    font-weight: bold;
 }
 
 /*Previews and adding */

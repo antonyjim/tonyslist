@@ -1,13 +1,29 @@
 <% include partials/header %>
 <% if (auth.userlevel === 2) {%>
     <div class="add-news">
-            <a id="add-news-button" class="back-button" href="/news/add">add news</a>
-        </div>
+        <a id="add-news button" class="news-btn" href="/news/add">add news</a>
+    </div>
 <% } %>
 
 <% console.log(auth.userlevel) %>
 <div class="current-news">
-    
+    <% for(let m in news) { %>
+        <div class="news-block">
+            <div class="news-img-cont">
+                <img class="news-img" src="/public/news/images/<%=news[m].pid%>/img1.jpg">
+            </div>
+            <div class="news-body">
+                <div class="news-para">
+                    <p><%=news[m].body.slice(0, 50)%></p>
+                </div> <br>
+                <div class="news-readmore">
+                    <a class="news-readmore-button" href="/news/?pid=<%=news[m].pid%>">
+                        Read More...
+                    </a>
+                </div>
+            </div>
+        </div>
+    <% } %>
 </div>
 
 
