@@ -1,0 +1,45 @@
+{
+    "title" : "register",
+    "inputs" : [{
+        "id" : "username",
+        "type" : "text",
+        "label" : "username",
+        "action" : "global.requireFields(this.id);"
+    }, {
+        "id" : "email",
+        "type" : "text",
+        "label" : "email",
+        "action" : "global.requireFields(this.id);"
+    }, {
+        "id" : "givenname",
+        "type" : "text",
+        "label" : "first name",
+        "action" : "global.requireFields(this.id);"
+    }, {
+        "id" : "famname",
+        "type" : "text",
+        "label" : "last name",
+        "action" : "global.requireFields(this.id);"
+    }, {
+        "id" : "passwd",
+        "type" : "password",
+        "label" : "password",
+        "action" : "global.requireFields(this.id);"
+    }, {
+        "id" : "passwdVer",
+        "type" : "password",
+        "label" : "verify password",
+        "action" : "global.requireFields(this.id);"
+    }], 
+    "submit" : [{
+        "id" : "register",
+        "value" : "register",
+        "action" : "global.submitForm();",
+        "attr" : "disabled"
+    }, {
+        "id" : "cancel",
+        "value" : "cancel",
+        "action" : "global.redirect('/');",
+        "attr" : ""
+    }]
+}

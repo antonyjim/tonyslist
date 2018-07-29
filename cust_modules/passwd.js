@@ -66,14 +66,14 @@ exports.verToken = ptoken => {
 exports.sendVerEmail = info => {
     return new Promise ((res, rej) => {
         var ptoken = {
-            email_reset: uuidv4()
+            emailReset: uuidv4()
         }
 
         authenticate.resPass(info.pid, ptoken).then(resolved => {
             var jwtoken = jwt.sign(ptoken, secret, {expiresIn: '60d'});
             var message = {
                 from : 'tonyslist.com',
-                to : info.username,
+                to : info.email,
                 subject : 'verify email',
                 html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Verify Email </a>'
             }

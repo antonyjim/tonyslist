@@ -85,10 +85,21 @@ module.exports = (app) => {
 
     //Registration Screen
     app.get('/users/register', (req, res) => {
-        res.render('users', {
-            title: 'User Info',
-            errlev: 0,
-            auth : auth
+        fs.readFile('./public/layouts/register.json', (err, data) => {
+            if (err) {
+                res.render('500', {
+                    title : '500 Server Error',
+                    auth: auth,
+                    error: err
+                })
+            } else {
+                var form = JSON.parse(data);
+                res.render('form', {
+                    title: 'register',
+                    auth : auth,
+                    form: form
+                })
+            }
         })
     })
     
@@ -278,7 +289,7 @@ module.exports = (app) => {
             famname: req.body.famname,
             email: req.body.email,
             pass: req.body.passwd,
-            username: req.body.email,
+            username: req.body.username,
             userlevel: 1,
             pid: uuidv4()
         }

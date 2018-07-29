@@ -21,13 +21,13 @@ const saltRounds = secrets.salt;
     | id          | int(11)      | NO   | PRI | NULL    | auto_increment |
     | username    | varchar(80)  | YES  |     | NULL    |                |
     | pass        | varchar(60)  | YES  |     | NULL    |                |
-    | givenname   | varchar(20)  | YES  |     | NULL    |                |
-    | famname     | varchar(20)  | YES  |     | NULL    |                |
+    | givenName   | varchar(20)  | YES  |     | NULL    |                |
+    | famName     | varchar(20)  | YES  |     | NULL    |                |
     | userlevel   | tinyint(4)   | NO   |     | NULL    |                |
-    | lastlogin   | datetime     | YES  |     | NULL    |                |
+    | lastLogin   | datetime     | YES  |     | NULL    |                |
     | pid         | varchar(100) | NO   |     | NULL    |                |
     | ptoken      | varchar(100) | YES  |     | NULL    |                |
-    | email_reset | varchar(100) | YES  |     | NULL    |                |
+    | emailReset  | varchar(100) | YES  |     | NULL    |                |
     | deletion    | varchar(100) | YES  |     | NULL    |                |
     | active      | tinyint(1)   | YES  |     | NULL    |                |
     | setup       | tinyint(1)   | YES  |     | NULL    |                |
@@ -48,7 +48,7 @@ const saltRounds = secrets.salt;
     +-------------+---------------+------+-----+---------+-------+
     | Field       | Type          | Null | Key | Default | Extra |
     +-------------+---------------+------+-----+---------+-------+
-    | post_pid    | varchar(100)  | NO   | PRI | NULL    |       |
+    | postPid    | varchar(100)  | NO   | PRI | NULL    |       |
     | pid         | varchar(100)  | YES  |     | NULL    |       |
     | title       | varchar(100)  | YES  |     | NULL    |       |
     | zip         | int(5)        | YES  |     | NULL    |       |
@@ -56,8 +56,8 @@ const saltRounds = secrets.salt;
     | desk        | varchar(1000) | YES  |     | NULL    |       |
     | contact     | int(10)       | YES  |     | NULL    |       |
     | price       | int(6)        | YES  |     | NULL    |       |
-    | created_on  | date          | YES  |     | NULL    |       |
-    | last_viewed | date          | YES  |     | NULL    |       |
+    | createdOn   | date          | YES  |     | NULL    |       |
+    | lastViewed  | date          | YES  |     | NULL    |       |
     | active      | tinyint(1)    | YES  |     | NULL    |       |
     | shortdesk   | varchar(30)   | YES  |     | NULL    |       |
     +-------------+---------------+------+-----+---------+-------+
@@ -87,12 +87,10 @@ exports.add = (newUser)=>{
                     });
                     encrypt.then( value => {
                         var email = passwd.sendVerEmail(newUser.email);
-                        newUser.username = newUser.email;
                         newUser.active = 1;
                         newUser.ptoken = '';
-                        delete newUser.email;
                         email.then(resolved => {
-                            newUser.email_reset = resolved;
+                            newUser.emailReset = resolved;
                             connection.query('INSERT INTO users SET ?', newUser, (err, results, fields) => {
                                 if (err) console.error(err);
                                 resolve(0);
@@ -132,7 +130,7 @@ exports.auth = function(userData) {
     var entry = new Date;
     return new Promise(function (resolve, reject) {
         var un = connection.escape(userData.email);
-        connection.query('SELECT * FROM users WHERE username = ' + un +' OR new_username = ' + un, function (err, results, fields) {
+        connection.query('SELECT * FROM users WHERE username = ' + un +' OR newUsername = ' + un, function (err, results, fields) {
             console.log(results);
             if (err) {
                 reject(err); 
@@ -142,8 +140,8 @@ exports.auth = function(userData) {
                 } else if (results[0].active == 1) {
                     new Promise(function (resolve, reject) {
                         var loginMsg = '';
-                        if (results[0].new_username != ' ' && userData.email != results[0].new_username) {
-                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {new_username : '', email_reset : ''}, (err, results, fields) => {
+                        if (results[0].newUsername != ' ' && userData.email != results[0].newUsername) {
+                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {newUsername : '', emailReset : ''}, (err, results, fields) => {
                                 if (err) {reject(err)};
                                 loginMsg = 'Your email has been reverted to what it used to be because you did not verify your new email.';
                             })
@@ -154,7 +152,7 @@ exports.auth = function(userData) {
                             if (err) {reject(err)}
                             if (res) {
                                 connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), 
-                                    {lastlogin : entry, deletion : ''}, (err, results, fields) => {
+                                    {lastLogin : entry, deletion : ''}, (err, results, fields) => {
                                     if (err) throw err;
                                 })
                                 results[0].loginMsg = loginMsg;
@@ -336,12 +334,12 @@ exports.forcePass = (pass, pid) => {
 //Enter in the email verification
 exports.verEmail = (ptoken, pid) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT pid, username FROM users WHERE email_reset = ' + connection.escape(ptoken), (err, results, fields) => {
+        connection.query('SELECT pid, username FROM users WHERE emailReset = ' + connection.escape(ptoken), (err, results, fields) => {
                 if (err) rej(err);
                 var update = {
-                    email_reset : '',
-                    new_username : '',
-                    username : results[0].new_username
+                    emailReset : '',
+                    newUsername : '',
+                    username : results[0].newUsername
                 }
                 connection.query("UPDATE users SET ? WHERE pid = " + connection.escape(results[0].pid), update, (err, results, fields) => {
                     if (err) rej(err);
@@ -391,7 +389,7 @@ exports.updInfo = (info) => {
                                 else if (results == '') {
                                     passwd.sendVerEmail(info).then(resolved => {
                                         var updateInfo = {
-                                            new_username : info.username
+                                            newUsername : info.username
                                         };
                                         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(info.pid), updateInfo, (err, results, fields) => {
                                             if (err) {rej(err)}
@@ -465,18 +463,18 @@ exports.cancelDelete = token => {
 exports.updatePost = data => {
     console.log(data);
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM post WHERE post_pid = ' + connection.escape(data.post_pid), (err, results, fields) => {
+        connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(data.postPid), (err, results, fields) => {
             if (err) {throw err};
             if (results != '') {
-                var pid = data.post_pid;
-                connection.query('UPDATE post SET ? WHERE post_pid = ' + connection.escape(pid), data, (err, results, fields) => {
+                var pid = data.postPid;
+                connection.query('UPDATE post SET ? WHERE postPid = ' + connection.escape(pid), data, (err, results, fields) => {
                     if (err) {rej(err);} 
-                    res(data.post_pid);
+                    res(data.postPid);
                 })
             } else if (results == '') {
                 connection.query('INSERT INTO post SET ?', data, (err, results, fields) => {
                     if (err) { rej(err) };
-                    res(data.post_pid);
+                    res(data.postPid);
                 })
             }
         })
@@ -485,16 +483,16 @@ exports.updatePost = data => {
 
 //Get an individual post from a req.url in the form of:
 // ?pid=randomstring
-exports.getPost = (post_pid) => {
+exports.getPost = (postPid) => {
     return  new Promise ((res, rej) => {
         var j = new Promise((ress, rejj) => {
-            connection.query('SELECT post, post_pid, desk, price, title, pid, contact, zip, active FROM post WHERE post_pid = ?', post_pid, (err, results, fields) => {
+            connection.query('SELECT post, postPid, desk, price, title, pid, contact, zip, active FROM post WHERE postPid = ?', postPid, (err, results, fields) => {
                 if (err) {rej(err)};
                 if (results == '') {
                     rejj(0);
                 } else {
-                    var seen = {last_viewed : new Date()}
-                    connection.query('UPDATE post SET ? WHERE post_pid = ' + connection.escape(results[0].post_pid), seen, (err, results, fields) => {
+                    var seen = {lastViewed : new Date()}
+                    connection.query('UPDATE post SET ? WHERE postPid = ' + connection.escape(results[0].postPid), seen, (err, results, fields) => {
                         if (err) console.log(err);
                     })
                     ress(results);
@@ -503,7 +501,7 @@ exports.getPost = (post_pid) => {
         })
        
         j.then (resss => {
-            var newPath = '/home/aj/Desktop/newnode/public/images/' + resss[0].post_pid;
+            var newPath = '/home/aj/Desktop/newnode/public/images/' + resss[0].postPid;
             var dir = checkDir(newPath);
             dir.then (resolu => {
                 var filed = fs.readdirSync(resolu)
@@ -540,14 +538,14 @@ exports.getList = (conditions) => {
             post += ' post = ' + connection.escape(conditions.post[m]) + ' OR'
         }
         var cond = post.slice(0, -3);
-    } else if (conditions.post_pid) {
-        var cond = 'post_pid = ' + connection.escape(conditions.post_pid)
+    } else if (conditions.postPid) {
+        var cond = 'postPid = ' + connection.escape(conditions.postPid)
     } else {
         var cond = 'active = 1';
     }
 
-    var sql = 'SELECT title, desk, zip, post, post_pid, price FROM post WHERE ' + cond + ' ORDER BY created_on';
-    //var old = `'SELECT title, desk, zip, post, post_pid, price FROM post WHERE ? ORDER BY created_on', conditions,`
+    var sql = 'SELECT title, desk, zip, post, postPid, price FROM post WHERE ' + cond + ' ORDER BY createdOn';
+    //var old = `'SELECT title, desk, zip, post, postPid, price FROM post WHERE ? ORDER BY createdOn', conditions,`
     return new Promise ((res, rej) => {
         connection.query(sql, (err, results, fields) => {
             if (err) rej(err);
@@ -559,7 +557,7 @@ exports.getList = (conditions) => {
 //List posts associated with account in the /account menu
 exports.getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT title, desk, zip, post, post_pid, pid, price FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+        connection.query('SELECT title, desk, zip, post, postPid, pid, price FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
             if (err) rej(err);
             var returns = {
                 posts: results
@@ -577,7 +575,7 @@ exports.getAcctPost = (conditions) => {
 exports.searchPosts = conditions => {
     return new Promise ((res, rej) => {
         var query = connection.escape('%' + conditions + '%');
-        connection.query('SELECT title, zip, post, post_pid, price FROM post WHERE desk LIKE ' + query, (err, results, fields) => {
+        connection.query('SELECT title, zip, post, postPid, price FROM post WHERE desk LIKE ' + query, (err, results, fields) => {
             if (err) {rej(err)}
             else if (results == '') {rej(404)}
             else {res(results)}
@@ -589,7 +587,7 @@ exports.searchPosts = conditions => {
 exports.getHot = () => {
     return new Promise ((res, rej) => {
         var all = {}
-        connection.query('SELECT post_pid, title, zip, price FROM post LIMIT 6', (err, results, fields) => {
+        connection.query('SELECT postPid, title, zip, price FROM post LIMIT 6', (err, results, fields) => {
             if (err) rej(err);
             connection.query('SELECT DISTINCT post FROM post', (err, categories, fields) => {
                 if (err) rej(err);

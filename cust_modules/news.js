@@ -47,11 +47,13 @@ router.get('/', (req, res) => {
                 news : resolved[0]
             }) 
         }, reason => {
+            console.log(err);
             res.render('404', {
                 title: '404 Error',
                 auth: auth
             })
         }).catch(err => {
+            console.log(err);
             res.render('500', {
                 title: '500 Server Error',
                 auth: auth,
@@ -69,6 +71,7 @@ router.get('/', (req, res) => {
                     news : resolved
                 })
             }, reason => {
+                console.log(reason);
                 res.render('500', {
                     title : '500 Server Error',
                     auth : auth,

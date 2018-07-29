@@ -1,0 +1,39 @@
+<% include partials/header %>
+
+<div class="body-cont">
+        <div class="form-input-cont">
+            <div id="form-input-title">
+                <%= form.title %>
+            </div>
+            <div id="form-input-input-cont">
+            <% for (let m in form.inputs) { %>
+            <% if(form.inputs[m].type == 'text' || form.inputs[m].type == 'password') { %>
+                <div class="form-input-input">
+                    <label class="user-label" for="<%=form.inputs[m].id%>">
+                        <%= form.inputs[m].label %>
+                    </label>
+                    <div class="form-input-border">
+                        <input type="<%=form.inputs[m].type%>" class="user-info" id="<%=form.inputs[m].id%>" name="<%=form.inputs[m].id%>" onkeyup="<%=form.inputs[m].action%>">
+                    </div>
+                </div>
+            <% } else if (form.inputs[m].type == 'radio' || form.inputs[m].type == 'checkbox') { %>
+                <div class="form-input-input">
+                    <label class="user-label-check" for="<%=form.inputs[m].id%>">
+                        <%=form.inputs[m].label%>
+                    </label>
+                    <input type="<%=form.inputs[m].type%>" class="user-form-check" id="<%=form.inputs[m].id%>" name="<%=form.inputs[m].name%>" onchange="<%form.inputs[m].action%>">
+                </div>
+            <% } else { %>
+                <% console.log(form[m].type) %>
+            <% } %>
+            <% } %>
+            </div>
+            <div id="form-input-submit-cont">
+            <% for (let m in form.submit) { %>
+                <button class="user-submit" id="<%=form.submit[m].id%>" action="<%=form.submit[m].action%>" <%=form.submit[m].attr%>.><%=form.submit[m].value%></button>
+            <% } %>
+            </div>
+        </div>
+    </div>
+
+<% include partials/footer %>

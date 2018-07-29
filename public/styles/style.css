@@ -134,6 +134,15 @@ label {
     float: right;
 }
 
+.required {
+    color: red;
+}
+
+.fulfilled {
+    color: green;
+}
+
+
 /* Index Stuff */
 
 .index-category-card {

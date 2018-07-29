@@ -8,6 +8,7 @@ var connection = mysql.createConnection(secrets.connection);
 exports.getList = conditions => {
     return new Promise ((res, rej) => {
         connection.query('SELECT * FROM news WHERE ?', conditions, (err, results, fields) => {
+            console.log(results);
             if (err) {rej(err)}
             else if (results == '') {
                 rej(404);
