@@ -84,7 +84,7 @@ module.exports = (app) => {
     });
 
     //Registration Screen
-    app.get('/users/register', (req, res) => {
+    app.get('/register', (req, res) => {
         fs.readFile('./public/layouts/register.json', (err, data) => {
             if (err) {
                 res.render('500', {
@@ -204,15 +204,15 @@ module.exports = (app) => {
                 res.render('account', {
                     title : 'Account',
                     post : resolved.posts,
+                    inactPosts : resolved.inactPosts,
                     auth : auth,
                     news : resolved.news
                 }
                 )}, rejected => {
-                res.render('account', {
-                    title : 'No posts found',
-                    post : {title : 'No posts found'},
+                res.render('500', {
+                    title : '500 Server Error',
                     auth : auth,
-                    news: resolved.news
+                    error : rejected
                 }) 
             }).catch (err => {
                 console.log(err)
@@ -258,8 +258,6 @@ module.exports = (app) => {
     //For the iframe on the edit and add screen.
     app.get('/preview', (req, res) => {
         let pid = req.query.pid;
-        console.log(req.body.query);
-
         if (pid) {
             authenticate.getPost(pid)
             .then(resolve => {
@@ -268,13 +266,17 @@ module.exports = (app) => {
                     post : resolve
                 })
             }, reason => {
-                res.render('preview', {});
+                res.render('preview', {
+                    post : {}
+                });
                 console.log(reason);
             }).catch(err => {
                 console.log(err);
             })
         } else {
-            res.render('preview');
+            res.render('preview', {
+                post : {}
+            });
         }
     })
 
@@ -283,38 +285,56 @@ module.exports = (app) => {
     //Post Requests
 
     //Create user in database
-    app.post('/users/register', (req, res) => {  
-        let newUser = {
-            givenname: req.body.givenname,
-            famname: req.body.famname,
-            email: req.body.email,
-            pass: req.body.passwd,
-            username: req.body.username,
-            userlevel: 1,
-            pid: uuidv4()
-        }
-    
-    
-        authenticate.add(newUser).
-        then((value) => {
-                if (value == 0) {
-                    res.render('addsucc', {
-                        title: 'Success',
-                        auth : auth
-                    })
+    app.post('/register', (req, res) => {  
+        let form = new frm.IncomingForm();
+
+        new Promise ((reso, reje) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) {reje(err)}
+                else if (!fields) {reje(404)}
+                else if (fields) {
+                    let emailFilter = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                    let usernameFilter = /^([a-zA-Z0-9]){8,20}$/;
+                    let passwdFilter = /^([a-zA-Z0-9.]){6,20}$/;
+                    console.log(fields);
+                    if (!fields.email.match(emailFilter)) {
+                        reje('email');
+                    } else if (!fields.username.match(usernameFilter)){
+                        reje('username')
+                    } else if (!fields.passwd.match(passwdFilter)){
+                        reje('passwd');
+                    } else {
+                        let newUser = {
+                            pid : uuidv4().slice(0, 8),
+                            username : fields.username,
+                            email : fields.email,
+                            pass : fields.passwd,
+                            givenName : fields.givenName,
+                            famName : fields.famName,
+                            userlevel : 1,
+                            setup: 0
+                        }
+                        reso(newUser)
+                    }
                 } else {
-                    res.render('login', {
-                        title: 'Error',
-                        passwordErr: password,
-                        errlev: 1,
-                        auth : auth
-                    })
+                    reje(500)
                 }
-        }, (reason) => {
-            console.log('failure is an option ', reason);
+            })
+        }).then (resolved => {
+            authenticate.add(resolved)
+            .then(value => {
+                res.render('addsucc', {
+                    title : 'Successfully Added',
+                    auth: auth
+                })
+            }, reason => {
+                res.status(reason.code).send(reason.error);
+            }).catch(err => {
+                res.send(err);
+            })
         }).catch(err => {
-            console.log(err);
-        });
+            res.send(err);
+        })
     });
     
     //Authenticate with db
@@ -430,9 +450,8 @@ module.exports = (app) => {
         })
         .then(resolved => {
             console.log(resolved);
-            let updateInfo = authenticate.updInfo(resolved);
-
-            updateInfo.then(resolved => {
+            authenticate.updInfo(resolved)
+            .then(resolved => {
                 res.status(200).send(resolved);
             }, reason => {
                 console.log('Reasoning', reason);
@@ -465,7 +484,7 @@ module.exports = (app) => {
         new Promise ((reso, reje) => {
             form.parse(req, (err, fields, files) => {
                 if (err) {reje(err)} else if (files) {
-                let newPath = '/home/aj/Desktop/newnode/public/images/' + fields.post_pid;
+                let newPath = '/home/aj/Desktop/newnode/public/images/' + fields.postPid;
                 checkDir(newPath)
                 .then(resolved => {
 
@@ -496,13 +515,13 @@ module.exports = (app) => {
             if (req.query.sub == 'true') {
                 fields.created_on = new Date();
                 let path = '/home/aj/Desktop/newnode/public/images/' + fields.post_pid;
+                console.log('Converting...')
                 childProcess.exec('convert -thumbnail 250 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
                     if(err) throw err;
                 })
             };
-            let update = authenticate.updatePost(fields);
-        
-            update.then (resolved => {
+            authenticate.updatePost(fields)
+            .then (resolved => {
                 if (req.query.sub == 'true') {
                     res.redirect(302, '/posts/?pid=' + resolved);
                 } else {

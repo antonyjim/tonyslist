@@ -65,7 +65,7 @@
             </div>
             <button id="addimg" class="user-submit" onclick="addInput();" type="button">Add</button><br>
             <div class="submit-buttons">
-                <input type="hidden" value="<%=uuid%>" name="post_pid" id="post_pid">
+                <input type="hidden" value="<%=uuid%>" name="postPid" id="post_pid">
                 <input class="user-submit" type="submit" value="list it!">
                 <button class="user-submit" onclick="save();" type="button">save</button>
             </div>
@@ -79,7 +79,7 @@
                 description
             </label><br>
 
-            <textarea id="desk" class="user-info desk-text" type="text" name="desk" rows="8" cols="70" required></textarea>
+            <textarea id="desc" class="user-info desc-text" type="text" name="desc" rows="8" cols="70" required></textarea>
         </div>
         </form>
         <div class="clr"></div>
@@ -131,7 +131,7 @@
         formData.append(price.name, price.value);
         formData.append(desk.name, desk.value);
         formData.append('contact', contact.value);
-        formData.append('post_pid', post_pid.value);
+        formData.append('postPid', post_pid.value);
         formData.append('post', f);
         
         for (let m of images) {

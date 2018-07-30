@@ -4,37 +4,56 @@
         "id" : "username",
         "type" : "text",
         "label" : "username",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info required",
+        "actions" : {
+            "onkeyup" : "global.requireFields(this.id);",
+            "onblur" : "checkUser();"
+        }
     }, {
         "id" : "email",
         "type" : "text",
         "label" : "email",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info required",
+        "actions" : {
+            "onkeyup" : "global.requireFields(this.id);"
+        }
     }, {
-        "id" : "givenname",
+        "id" : "givenName",
         "type" : "text",
         "label" : "first name",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info",
+        "actions" : {
+            "onkeyup" : "global.requireFields(this.id);"
+        }
     }, {
-        "id" : "famname",
+        "id" : "famName",
         "type" : "text",
         "label" : "last name",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info",
+        "actions" : {
+            "onkeyup" : "global.requireFields(this.id);"
+        }
     }, {
         "id" : "passwd",
         "type" : "password",
         "label" : "password",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info required",
+        "actions" : {
+            "onkeyup" : "global.requireFields(this.id);"
+        }
     }, {
         "id" : "passwdVer",
         "type" : "password",
         "label" : "verify password",
-        "action" : "global.requireFields(this.id);"
+        "classes" : "user-info required",
+        "actions" : { 
+            "onkeyup" : "global.requireFields(this.id);"
+        }
     }], 
     "submit" : [{
-        "id" : "register",
+        "id" : "submit",
         "value" : "register",
-        "action" : "global.submitForm();",
+        "action" : "global.submitForm('/register');",
         "attr" : "disabled"
     }, {
         "id" : "cancel",

@@ -15,25 +15,26 @@ const saltRounds = secrets.salt;
     The main tables are laid out as follows:
 
     SQL> describe users;
-    +-------------+--------------+------+-----+---------+----------------+
-    | Field       | Type         | Null | Key | Default | Extra          |
-    +-------------+--------------+------+-----+---------+----------------+
-    | id          | int(11)      | NO   | PRI | NULL    | auto_increment |
-    | username    | varchar(80)  | YES  |     | NULL    |                |
-    | pass        | varchar(60)  | YES  |     | NULL    |                |
-    | givenName   | varchar(20)  | YES  |     | NULL    |                |
-    | famName     | varchar(20)  | YES  |     | NULL    |                |
-    | userlevel   | tinyint(4)   | NO   |     | NULL    |                |
-    | lastLogin   | datetime     | YES  |     | NULL    |                |
-    | pid         | varchar(100) | NO   |     | NULL    |                |
-    | ptoken      | varchar(100) | YES  |     | NULL    |                |
-    | emailReset  | varchar(100) | YES  |     | NULL    |                |
-    | deletion    | varchar(100) | YES  |     | NULL    |                |
-    | active      | tinyint(1)   | YES  |     | NULL    |                |
-    | setup       | tinyint(1)   | YES  |     | NULL    |                |
-    +-------------+--------------+------+-----+---------+----------------+
+    +------------+-------------+------+-----+---------+-------+
+    | Field      | Type        | Null | Key | Default | Extra |
+    +------------+-------------+------+-----+---------+-------+
+    | pid        | varchar(36) | NO   | PRI | NULL    |       |
+    | username   | varchar(60) | YES  |     | NULL    |       |
+    | pass       | varchar(60) | NO   |     | NULL    |       |
+    | email      | varchar(20) | YES  |     | NULL    |       |
+    | newEmail   | varchar(20) | YES  |     | NULL    |       |
+    | givenName  | varchar(30) | YES  |     | NULL    |       |
+    | famName    | varchar(30) | YES  |     | NULL    |       |
+    | userlevel  | tinyint(4)  | YES  |     | NULL    |       |
+    | lastlogin  | datetime    | YES  |     | NULL    |       |
+    | ptoken     | varchar(36) | YES  |     | NULL    |       |
+    | emailReset | varchar(36) | YES  |     | NULL    |       |
+    | deletion   | varchar(36) | YES  |     | NULL    |       |
+    | active     | tinyint(1)  | YES  |     | NULL    |       |
+    | setup      | tinyint(1)  | YES  |     | NULL    |       |
+    +------------+-------------+------+-----+---------+-------+
 
-    SQL> describe user_data;
+    SQL> describe userData;
     +----------+--------------+------+-----+---------+----------------+
     | Field    | Type         | Null | Key | Default | Extra          |
     +----------+--------------+------+-----+---------+----------------+
@@ -45,27 +46,22 @@ const saltRounds = secrets.salt;
     +----------+--------------+------+-----+---------+----------------+
 
     SQL> describe post;
-    +-------------+---------------+------+-----+---------+-------+
-    | Field       | Type          | Null | Key | Default | Extra |
-    +-------------+---------------+------+-----+---------+-------+
-    | postPid    | varchar(100)  | NO   | PRI | NULL    |       |
-    | pid         | varchar(100)  | YES  |     | NULL    |       |
-    | title       | varchar(100)  | YES  |     | NULL    |       |
-    | zip         | int(5)        | YES  |     | NULL    |       |
-    | post        | varchar(10)   | YES  |     | NULL    |       |
-    | desk        | varchar(1000) | YES  |     | NULL    |       |
-    | contact     | int(10)       | YES  |     | NULL    |       |
-    | price       | int(6)        | YES  |     | NULL    |       |
-    | createdOn   | date          | YES  |     | NULL    |       |
-    | lastViewed  | date          | YES  |     | NULL    |       |
-    | active      | tinyint(1)    | YES  |     | NULL    |       |
-    | shortdesk   | varchar(30)   | YES  |     | NULL    |       |
-    +-------------+---------------+------+-----+---------+-------+
-
-    You may notice some things that don't make a lot of sense, and that's because
-    there really is no reason. E.G. in post, the description column is called Desk. 
-    Why? Because I made a typo when I created the table and it was easier to change the name 
-    of an input than to ALTER post and MODIFY desk. 
+    +------------+---------------+------+-----+---------+-------+
+    | Field      | Type          | Null | Key | Default | Extra |
+    +------------+---------------+------+-----+---------+-------+
+    | postPid    | varchar(36)   | NO   | PRI | NULL    |       |
+    | pid        | varchar(36)   | NO   |     | NULL    |       |
+    | title      | varchar(100)  | YES  |     | NULL    |       |
+    | zip        | int(5)        | YES  |     | NULL    |       |
+    | post       | varchar(10)   | YES  |     | NULL    |       |
+    | desc       | varchar(1000) | YES  |     | NULL    |       |
+    | contact    | int(10)       | YES  |     | NULL    |       |
+    | price      | int(7)        | YES  |     | NULL    |       |
+    | createdOn  | date          | YES  |     | NULL    |       |
+    | lastViewed | date          | YES  |     | NULL    |       |
+    | viewCount  | int(7)        | YES  |     | NULL    |       |
+    | active     | tinyint(1)    | YES  |     | NULL    |       |
+    +------------+---------------+------+-----+---------+-------+
 
     */
 
@@ -73,30 +69,31 @@ const saltRounds = secrets.salt;
 
 //Registration Action
 exports.add = (newUser)=>{
+    console.log(newUser);
     var query = new Promise ((resolve, reject) => {
-        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.email), 
+        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.username), 
             (err, results, fields) => {
                 if (err) {reject(err)} 
                 else if (results == "") {
-                    var encrypt = new Promise((resolve, reject) => {
+                    new Promise((resolve, reject) => {
                         bcrypt.hash(newUser.pass, saltRounds, (err, hash) => {
                             if (err) reject(err);
                             newUser.pass = hash;
                             resolve(0);
                         });
-                    });
-                    encrypt.then( value => {
-                        var email = passwd.sendVerEmail(newUser.email);
+                    }).then( value => {
+                        var email = passwd.sendVerEmail(newUser);
                         newUser.active = 1;
                         newUser.ptoken = '';
                         email.then(resolved => {
                             newUser.emailReset = resolved;
                             connection.query('INSERT INTO users SET ?', newUser, (err, results, fields) => {
                                 if (err) console.error(err);
-                                resolve(0);
+                                resolve(200);
                             });
                         }, reason => {
-                            reject(reason);
+                            console.log(reason);
+                            reject(500);
                         }).catch(err => {
                             reject(err);
                         })
@@ -104,7 +101,7 @@ exports.add = (newUser)=>{
                     });
                     
                 } else {
-                    reject(1);
+                    reject(465);
                 }
         });
     });
@@ -114,11 +111,9 @@ exports.add = (newUser)=>{
     query.then((value) => {
         return value;
     },(reason) => {
-        console.error(err);
+        console.error(reason);
         return 599;
-    });
-
-    query.catch((err) => {
+    }).catch((err) => {
         throw err;
     });
     return query;
@@ -130,7 +125,7 @@ exports.auth = function(userData) {
     var entry = new Date;
     return new Promise(function (resolve, reject) {
         var un = connection.escape(userData.email);
-        connection.query('SELECT * FROM users WHERE username = ' + un +' OR newUsername = ' + un, function (err, results, fields) {
+        connection.query('SELECT * FROM users WHERE username = ' + un +' OR newEmail = ' + un, function (err, results, fields) {
             console.log(results);
             if (err) {
                 reject(err); 
@@ -140,8 +135,8 @@ exports.auth = function(userData) {
                 } else if (results[0].active == 1) {
                     new Promise(function (resolve, reject) {
                         var loginMsg = '';
-                        if (results[0].newUsername != ' ' && userData.email != results[0].newUsername) {
-                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {newUsername : '', emailReset : ''}, (err, results, fields) => {
+                        if (results[0].newEmail != ' ' && userData.email != results[0].newEmail) {
+                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {newEmail : '', emailReset : ''}, (err, results, fields) => {
                                 if (err) {reject(err)};
                                 loginMsg = 'Your email has been reverted to what it used to be because you did not verify your new email.';
                             })
@@ -216,10 +211,10 @@ exports.checkExist = function (username) {
     })
 }
 
-//Get data from user_data table
+//Get data from userData table
 exports.userDataGet = pid => {
     return new Promise((res, rej) => {
-        connection.query('SELECT phone, zip, pid FROM user_data WHERE pid = ' + connection.escape(pid), (err, results, fields) => {
+        connection.query('SELECT phone, zip, pid FROM userData WHERE pid = ' + connection.escape(pid), (err, results, fields) => {
             if (err) {rej(err)}
             else if (results != '' ) {
                 res(results[0]);
@@ -230,15 +225,15 @@ exports.userDataGet = pid => {
     })
 }
 
-//Update data in the user_data table
+//Update data in the userData table
 exports.userDataUpd = userData => {
     return new Promise((res, rej) => {
-        connection.query('SELECT * FROM user_data WHERE pid = ' + connection.escape(userData.pid), (err, results, fields) => {
+        connection.query('SELECT * FROM userData WHERE pid = ' + connection.escape(userData.pid), (err, results, fields) => {
             if (err) {rej(err)}
             else if (results != '') {
                 var pid = userData.pid;
                 delete userData.pid;
-                connection.query('UPDATE user_data SET ? WHERE pid = ' + connection.escape(pid), userData, (err, results, fields) => {
+                connection.query('UPDATE userData SET ? WHERE pid = ' + connection.escape(pid), userData, (err, results, fields) => {
                     if (err) {rej(err)}
                     else {
                         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), {setup : 1}, (err, results, fields) => {
@@ -250,7 +245,7 @@ exports.userDataUpd = userData => {
                     }
                 })
             } else if (results == '') {
-                connection.query('INSERT INTO user_data SET ?', userData, (err, results, fields) => {
+                connection.query('INSERT INTO userData SET ?', userData, (err, results, fields) => {
                     if (err) {rej(err)}
                     else {
                         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(userData.pid), {setup : 1}, (err, results, fields) => {
@@ -338,8 +333,8 @@ exports.verEmail = (ptoken, pid) => {
                 if (err) rej(err);
                 var update = {
                     emailReset : '',
-                    newUsername : '',
-                    username : results[0].newUsername
+                    newEmail : '',
+                    email : results[0].newEmail
                 }
                 connection.query("UPDATE users SET ? WHERE pid = " + connection.escape(results[0].pid), update, (err, results, fields) => {
                     if (err) rej(err);
@@ -389,7 +384,7 @@ exports.updInfo = (info) => {
                                 else if (results == '') {
                                     passwd.sendVerEmail(info).then(resolved => {
                                         var updateInfo = {
-                                            newUsername : info.username
+                                            newEmail : info.username
                                         };
                                         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(info.pid), updateInfo, (err, results, fields) => {
                                             if (err) {rej(err)}
@@ -483,12 +478,12 @@ exports.updatePost = data => {
 
 //Get an individual post from a req.url in the form of:
 // ?pid=randomstring
-exports.getPost = (postPid) => {
+exports.getPost = postPid => {
     return  new Promise ((res, rej) => {
         var j = new Promise((ress, rejj) => {
-            connection.query('SELECT post, postPid, desk, price, title, pid, contact, zip, active FROM post WHERE postPid = ?', postPid, (err, results, fields) => {
+            connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(postPid), (err, results, fields) => {
                 if (err) {rej(err)};
-                if (results == '') {
+                if (results == undefined) {
                     rejj(0);
                 } else {
                     var seen = {lastViewed : new Date()}
@@ -544,7 +539,7 @@ exports.getList = (conditions) => {
         var cond = 'active = 1';
     }
 
-    var sql = 'SELECT title, desk, zip, post, postPid, price FROM post WHERE ' + cond + ' ORDER BY createdOn';
+    var sql = 'SELECT * FROM post WHERE ' + cond + ' ORDER BY createdOn';
     //var old = `'SELECT title, desk, zip, post, postPid, price FROM post WHERE ? ORDER BY createdOn', conditions,`
     return new Promise ((res, rej) => {
         connection.query(sql, (err, results, fields) => {
@@ -557,10 +552,20 @@ exports.getList = (conditions) => {
 //List posts associated with account in the /account menu
 exports.getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT title, desk, zip, post, postPid, pid, price FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+        connection.query('SELECT * FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
             if (err) rej(err);
+            let posts = [],
+                inactPosts = [];
+            for (let m in results) {
+                if (results[m].active == 1) {
+                    posts.push(results[m])
+                } else {
+                    inactPosts.push(results[m])
+                }
+            }
             var returns = {
-                posts: results
+                posts: posts,
+                inactPosts : inactPosts
             }
             connection.query('SELECT * FROM news WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
                 if (err) rej(err);
@@ -575,7 +580,7 @@ exports.getAcctPost = (conditions) => {
 exports.searchPosts = conditions => {
     return new Promise ((res, rej) => {
         var query = connection.escape('%' + conditions + '%');
-        connection.query('SELECT title, zip, post, postPid, price FROM post WHERE desk LIKE ' + query, (err, results, fields) => {
+        connection.query('SELECT title, zip, post, postPid, price FROM post WHERE desc LIKE ' + query, (err, results, fields) => {
             if (err) {rej(err)}
             else if (results == '') {rej(404)}
             else {res(results)}

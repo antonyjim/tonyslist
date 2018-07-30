@@ -80,7 +80,7 @@ exports.sendVerEmail = info => {
             transporter.sendMail(message, (err) => {
                 if (err) rej(err);
                 res(ptoken);
-                console.log('Successfully sent ', message ,' to ', info.username);
+                console.log('Successfully sent ', message ,' to ', info.email);
             })
         }, reason => {
             rej(reason);

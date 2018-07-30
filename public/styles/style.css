@@ -68,7 +68,7 @@ label {
     background: rgb(102, 180, 252);
     outline: 0;
     border: 0;
-    margin-left: 20px;
+    margin: 10px;
 }
 
 .user-submit:active {
@@ -401,6 +401,32 @@ label {
     float: right;
 }
 
+/* Forms */
+.form-body-cont {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    padding: 50px;
+}
+
+.form-input-cont {
+    display: inline-block;
+    text-align: left;
+    box-shadow: 0 0 10px grey;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.form-input-title {
+    font-size: 30px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.form-input-input-cont {
+
+}
+
 /* Modal info */
 
 .login-modal {
@@ -487,11 +513,10 @@ label {
 }
 
 .add-post-card {
-    width: 90%;
-    position: relative;
-    float: left;
-    margin: 15px 2%;
-    box-shadow : 5px 5px 15px #b1b1b1;
+    width: 95%;
+    margin: 30px auto;
+    box-shadow : 0 0 15px #b1b1b1;
+    border-radius: 6px;
 }
 
 .add-post-form {
@@ -513,6 +538,32 @@ label {
 .image-preview-container-child {
     margin: auto;
     width: 45%;
+}
+
+.prev {
+    position: absolute;
+    top: 45%;
+    padding: 10px;
+    border-radius: 0 4px 4px 0;
+    background: grey;
+    left: 0;
+}
+
+.prev::before {
+    content: "<"
+}
+
+.next {
+    position: absolute;
+    top: 45%;
+    padding: 10px;
+    border-radius: 0 4px 4px 0;
+    background: grey;
+    right: 0;
+}
+
+.next::before {
+    content: ">"
 }
 
 .placeholder-img {
@@ -688,6 +739,10 @@ label {
 
 .zip {
     font-size: 25px;
+}
+
+.post-img {
+    display: none;
 }
 
 .zip::before {

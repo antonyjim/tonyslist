@@ -6,13 +6,16 @@
 
     <body>
             <div class="image-preview-container">
+                    <span class="next" onclick="slideshow(1);"></span>
+                    <span class="prev" onclick="slideshow(-1);"></span>
                     <div class="image-preview-container-child">
                         <div class="image-preview">
                             <div class="root">
-                                <% if (typeof post !== 'undefined') {%>
+                                <% if (post !== {}) {%>
+                                    <% console.log(post) %>
                                     <% for (let m in post.images) {%>
                                         <div class="post-img">
-                                            <img class="post-act-img" src="/public/images/<%=post.post_pid%>/<%=post.images[m]%>">
+                                            <img class="post-act-img" src="/public/images/<%=post.postPid%>/<%=post.images[m]%>">
                                         </div>
                                     <%}%>
                                 <%} else {%>
@@ -27,25 +30,46 @@
                 </div>
                 <div class="prev-details">
                     <div class="title-price">
-                        <span id="title" class="prev-title"></span>
+                        <span id="title" class="prev-title"><%=post.title%></span>
                         <div class="clr"></div>
                     </div>
-                    <div id="desc" class="desc-container"></div>
+                    <div id="desc" class="desc-container"><%=post.desc%></div>
                 </div>
                 <div class="prev-detail">
-                    <div class="detail-card">
+                    <div class="detail-card card">
                         <div class="card-title">
                             Contact Info
                         </div>
                         <div class="card-body detail-card-body">
                             <ul class="post-detail">
-                                <li id="price" class="price"> </li>
-                                <li id="contact-num" class="contact-num"> </li>
+                                <li id="main-price" class="main-price"> <%=post.price%> </li>
+                                <li id="contact-num" class="contact-num"> <%=post.contact%> </li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <script>
+                    //Display the first image by default
+                    document.querySelector('.post-img').style.display = "block";
+
+                    var slideshow = val => {
+                        let slides = document.querySelectorAll('.post-img');
+                        for (let m in slides) {
+                            if (slides[m].style.display == 'block') {
+                                let n = Number(m) + Number(val);
+                                if (n == slides.length) {
+                                    n = 0;
+                                } else if (n < 0) {
+                                    n = slides.length - 1;
+                                }
+                                console.log(n);
+                                slides[m].style.display = 'none';
+                                slides[n].style.display = 'block';
+                                break;
+                            }
+                        }
+                    }
+
                     function parseQuery() {
                         var results = {};
                         

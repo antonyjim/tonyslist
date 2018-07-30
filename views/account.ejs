@@ -50,21 +50,47 @@
     <% for (let m of post) { %>
         <div class="account-post post-postslist card">
             <div class="post-thmb-cont">
-                    <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.post_pid%>/thmb.jpg">
+                    <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.postPid%>/thmb.jpg">
             </div>
             
-            <a class="post-postslist-title" href="/posts/?pid=<%=m.post_pid%>">
+            <a class="post-postslist-title" href="/posts/?pid=<%=m.postPid%>">
                 <%=m.title%>
             </a>
             <div class="post-postlist-desc-cont">
                     <div class="price">
                         <%=m.price%>
                     </div>
-                    <a href="/posts/edit/?pid=<%=m.post_pid%>" class="post-postlist-edit">Edit</a>
+                    <a href="/posts/edit/?pid=<%=m.postPid%>" class="post-postlist-edit">Edit</a>
             </div>
         </div>
     <% } %>
 </div>
+<% if (inactPosts != '') { %>
+    <% console.log(inactPosts) %>
+    <div class="inactive-posts">
+        inactive posts
+    </div>
+    <div class="account-art-cont">
+        <% for (let m of inactPosts) { %>
+            <div class="account-post post-postslist card">
+                <div class="post-thmb-cont">
+                        <img class="post-thumb" alt="thumbnail" src="/public/images/<%=m.postPid%>/thmb.jpg">
+                </div>
+                
+                <a class="post-postslist-title" href="/posts/?pid=<%=m.postPid%>">
+                    <%=m.title%>
+                </a>
+                <div class="post-postlist-desc-cont">
+                        <div class="price">
+                            <%=m.price%>
+                        </div>
+                        <a href="/posts/edit/?pid=<%=m.postPid%>" class="post-postlist-edit">Edit</a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+<% } %>
+
 <% if (auth.userlevel == 2 && news) { %>
     <div class="active-posts">
         news

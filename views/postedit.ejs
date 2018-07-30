@@ -27,31 +27,31 @@
                             category
                         </label><br>
             
-                        <label class="check-form-label" for="cars">
-                            cars and trucks
-                        </label>
-                        <input id="cars" name="post" type="radio" class="category check-form-radio" value="cars"><br>
-            
-                        <label class="check-form-label" for="boats">
-                            boats and watercraft
-                        </label>
-                        <input id="boats" name="post" type="radio" class="category check-form-radio" value="boats"><br>
-            
-                        <label class="check-form-label" for="collect">
-                            collectibles
-                        </label>
-                        <input id="collect" name="post" type="radio" class="category check-form-radio" value="collect"><br>
-            
-                        <label class="check-form-label" for="electronics">
-                            electronics
-                        </label>
-                        <input id="electronics" name="post" type="radio" class="category check-form-radio" value="electronics"><br>
-            
-                        <label class="check-form-label" for="husapp">
-                            household appliances
-                        </label>
-                        <input id="husapp" name="post" type="radio" class="category check-form-radio" value="husapp"><br>
-            
+                            <label class="check-form-label" for="cars">
+                                cars and trucks
+                            </label>
+                            <input id="cars" name="post" type="radio" class="category check-form-radio" value="cars"><br>
+                
+                            <label class="check-form-label" for="boats">
+                                boats and watercraft
+                            </label>
+                            <input id="boats" name="post" type="radio" class="category check-form-radio" value="boats"><br>
+                
+                            <label class="check-form-label" for="collect">
+                                collectibles
+                            </label>
+                            <input id="collect" name="post" type="radio" class="category check-form-radio" value="collect"><br>
+                
+                            <label class="check-form-label" for="electronic">
+                                electronics
+                            </label>
+                            <input id="electronic" name="post" type="radio" class="category check-form-radio" value="electronic"><br>
+                
+                            <label class="check-form-label" for="husapp">
+                                household appliances
+                            </label>
+                            <input id="husapp" name="post" type="radio" class="category check-form-radio" value="husapp"><br>
+                
                         <label class="form-label" for="contact">
                             contact phone 
                         </label><br>
@@ -81,12 +81,12 @@
                             <button class="user-submit" onclick="save();" type="button">save</button>
                     </div>
 
-                    <input type="hidden" value="<%=post.post_pid%>" name="post_pid" id="post_pid">
+                    <input type="hidden" value="<%=post.postPid%>" name="postPid" id="postPid">
                     </div>
                 
             </div>
             <div class="preview-container">
-                <iframe class="preview-iframe" id="preview" src="/preview/?pid=<%=post.post_pid%>"></iframe>
+                <iframe class="preview-iframe" id="preview" src="/preview/?pid=<%=post.postPid%>"></iframe>
             </div>
 
             <div class="description-text-box">
@@ -94,7 +94,7 @@
                     description
                 </label><br>
 
-                <textarea id="desk" class="user-info desk-text" type="text" name="desk" rows="8" cols="70" required><%=post.desk%></textarea>
+                <textarea id="desc" class="user-info desc-text" type="text" name="desc" rows="8" cols="70" required><%=post.desc%></textarea>
             </div>
         </form>
             <div class="clr"></div>
@@ -134,7 +134,7 @@
     function save() {
         var f = 0;       
         var iframe = document.getElementById('preview');
-        var id = document.getElementById('post_pid');
+        var id = document.getElementById('postPid');
         
         //Get category value
         var j = document.querySelectorAll('.category');
@@ -155,9 +155,9 @@
             title = document.getElementById('title'),
             zip = document.getElementById('zip'),
             price = document.getElementById('price'),
-            desk = document.getElementById('desk'),
+            desc = document.getElementById('desc'),
             contact = document.getElementById('contact'),
-            post_pid = document.getElementById('post_pid'),
+            postPid = document.getElementById('postPid'),
             post = f,
             active = g
         ;
@@ -167,9 +167,9 @@
         formData.append(title.name, title.value);
         formData.append(zip.name, zip.value);
         formData.append(price.name, price.value);
-        formData.append(desk.name, desk.value);
+        formData.append(desc.name, desc.value);
         formData.append('contact', contact.value);
-        formData.append('post_pid', post_pid.value);
+        formData.append('postPid', postPid.value);
         formData.append('post', f);
         
         if (images.length > 1) {
@@ -180,7 +180,7 @@
         
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = (err) => {
-                var pid = {pid : post_pid.value};
+                var pid = {pid : postPid.value};
                 reloadIf(pid);
                 saved();
         }

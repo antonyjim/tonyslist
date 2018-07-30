@@ -2,8 +2,8 @@
     "title" : "change email",
     "inputs" : [{
         "type" : "email",
-        "name" : "username",
-        "id" : "username",
+        "name" : "email",
+        "id" : "email",
         "label" : "new email"
     } , {
         "type" : "password",

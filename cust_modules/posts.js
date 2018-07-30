@@ -53,17 +53,18 @@ router.get('/', (req, res) => {
 
     getting.then(results => {
         if (results.length == 1) {
-            var getPost = authenticate.getPost(results[0].post_pid);
-            getPost.then (resolved => {
+            authenticate.getPost(results[0].postPid)
+            .then (resolved => {
                 res.render('indivpost', {
                     title : resolved.title,
                     post: resolved,
                     auth : auth
                 })
             }, rejected => {
-                res.render('post500', {
-                    error: 'An unknown error occured, please try again later',
-                    auth : auth
+                res.render('500', {
+                    title: 'Internal Server Error',
+                    auth : auth,
+                    error : rejected
                 })
             }).catch(err => {
                 console.log(err);
