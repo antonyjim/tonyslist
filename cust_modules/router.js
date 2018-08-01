@@ -305,7 +305,7 @@ module.exports = (app) => {
                         reje('passwd');
                     } else {
                         let newUser = {
-                            pid : uuidv4().slice(0, 8),
+                            pid : uuidv4().slice(0, 7),
                             username : fields.username,
                             email : fields.email,
                             pass : fields.passwd,
