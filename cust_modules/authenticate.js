@@ -269,7 +269,9 @@ exports.checkToken = token => {
             else if (decoded) {
                 var payload = {
                     user : decoded.user,
-                    userlevel : decoded.userlevel
+                    userlevel : decoded.userlevel,
+                    contact : decoded.contact,
+                    zip : decoded.zip
                 };
                 var ntoken = jwt.sign(payload, secret, {expiresIn: '1h'});
                 var resolved = {
@@ -483,7 +485,7 @@ exports.getPost = postPid => {
         var j = new Promise((ress, rejj) => {
             connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(postPid), (err, results, fields) => {
                 if (err) {rej(err)};
-                if (results == undefined) {
+                if (results == '') {
                     rejj(0);
                 } else {
                     var seen = {lastViewed : new Date()}

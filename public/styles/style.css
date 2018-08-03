@@ -55,6 +55,7 @@ li {
 .nav-link-cont {
     float: right;
     margin: 20px;
+    white-space: nowrap;
 }
 
 label {
@@ -88,6 +89,7 @@ label {
 
 .err-cont {
     padding: 50px;
+    min-height: 450px;
 }
 
 .err-header {
@@ -641,6 +643,10 @@ label {
 
 .desc-container {
     font-size: 17px;
+}
+
+.desc-text {
+    width: 60%;
 }
 
 .title-price {

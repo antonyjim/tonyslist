@@ -1,6 +1,7 @@
 var express = require('express');
 var authenticate = require('./authenticate');
 var frm = require('formidable');
+var uuidv4 = require('uuid/v4');
 var gr = require('./global_resources');
 
 var router = express.Router();
@@ -78,6 +79,7 @@ router.get('/', (req, res) => {
             })
         }
     }, reason => {
+        console.log(reason);
         res.render('post404', {
             title : 'Not Found',
             auth : auth
@@ -93,7 +95,7 @@ router.get('/add', (req, res) => {
         res.render('postadd', {
             title: "Add Post",
             errlev : 0,
-            uuid : auth.user,
+            uuid : uuidv4().slice(0, 7),
             auth : auth
         })
     } else {
