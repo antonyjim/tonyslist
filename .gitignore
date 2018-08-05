@@ -1,0 +1,9 @@
+#Node Modules
+node_modules/
+
+#Secrets
+
+
+#Runtimes
+*.pid
+package-lock.json
