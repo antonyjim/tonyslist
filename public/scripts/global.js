@@ -103,7 +103,7 @@ var global = {
         xhr.open('POST', url);
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                window.location.href = this.responseText
+                window.location.href = '/'
             } else if (this.readyState == 4 && this.status > 400 && this.status < 500) {
                 openModal(this.responseText);
             } else if (this.readyState == 4 && this.status > 499) {

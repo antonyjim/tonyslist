@@ -9,67 +9,10 @@ var connection = mysql.createConnection(secrets.connection);
 const secret = secrets.jwt;
 const saltRounds = secrets.salt;
 
-/*
-    A note on schema
-
-    The main tables are laid out as follows:
-
-    SQL> describe users;
-    +------------+-------------+------+-----+---------+-------+
-    | Field      | Type        | Null | Key | Default | Extra |
-    +------------+-------------+------+-----+---------+-------+
-    | pid        | varchar(36) | NO   | PRI | NULL    |       |
-    | username   | varchar(60) | YES  |     | NULL    |       |
-    | pass       | varchar(60) | NO   |     | NULL    |       |
-    | email      | varchar(20) | YES  |     | NULL    |       |
-    | newEmail   | varchar(20) | YES  |     | NULL    |       |
-    | givenName  | varchar(30) | YES  |     | NULL    |       |
-    | famName    | varchar(30) | YES  |     | NULL    |       |
-    | userlevel  | tinyint(4)  | YES  |     | NULL    |       |
-    | lastlogin  | datetime    | YES  |     | NULL    |       |
-    | ptoken     | varchar(36) | YES  |     | NULL    |       |
-    | emailReset | varchar(36) | YES  |     | NULL    |       |
-    | deletion   | varchar(36) | YES  |     | NULL    |       |
-    | active     | tinyint(1)  | YES  |     | NULL    |       |
-    | setup      | tinyint(1)  | YES  |     | NULL    |       |
-    +------------+-------------+------+-----+---------+-------+
-
-    SQL> describe userData;
-    +----------+--------------+------+-----+---------+----------------+
-    | Field    | Type         | Null | Key | Default | Extra          |
-    +----------+--------------+------+-----+---------+----------------+
-    | id       | int(11)      | NO   | PRI | NULL    | auto_increment |
-    | pid      | varchar(100) | NO   |     | NULL    |                |
-    | phone    | int(11)      | YES  |     | NULL    |                |
-    | settings | varchar(100) | YES  |     | NULL    |                |
-    | zip      | int(5)       | YES  |     | NULL    |                |
-    +----------+--------------+------+-----+---------+----------------+
-
-    SQL> describe post;
-    +------------+---------------+------+-----+---------+-------+
-    | Field      | Type          | Null | Key | Default | Extra |
-    +------------+---------------+------+-----+---------+-------+
-    | postPid    | varchar(36)   | NO   | PRI | NULL    |       |
-    | pid        | varchar(36)   | NO   |     | NULL    |       |
-    | title      | varchar(100)  | YES  |     | NULL    |       |
-    | zip        | int(5)        | YES  |     | NULL    |       |
-    | post       | varchar(10)   | YES  |     | NULL    |       |
-    | desc       | varchar(1000) | YES  |     | NULL    |       |
-    | contact    | int(10)       | YES  |     | NULL    |       |
-    | price      | int(7)        | YES  |     | NULL    |       |
-    | createdOn  | date          | YES  |     | NULL    |       |
-    | lastViewed | date          | YES  |     | NULL    |       |
-    | viewCount  | int(7)        | YES  |     | NULL    |       |
-    | active     | tinyint(1)    | YES  |     | NULL    |       |
-    +------------+---------------+------+-----+---------+-------+
-
-    */
-
 //User functions
 
 //Registration Action
 exports.add = (newUser)=>{
-    console.log(newUser);
     var query = new Promise ((resolve, reject) => {
         connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.username), 
             (err, results, fields) => {
@@ -105,9 +48,6 @@ exports.add = (newUser)=>{
                 }
         });
     });
-
-
-    
     query.then((value) => {
         return value;
     },(reason) => {
@@ -126,7 +66,6 @@ exports.auth = function(userData) {
     return new Promise(function (resolve, reject) {
         var un = connection.escape(userData.email);
         connection.query('SELECT * FROM users WHERE username = ' + un +' OR newEmail = ' + un, function (err, results, fields) {
-            console.log(results);
             if (err) {
                 reject(err); 
             } else if (results != '') {
@@ -228,12 +167,28 @@ exports.userDataGet = pid => {
 //Update data in the userData table
 exports.userDataUpd = userData => {
     return new Promise((res, rej) => {
-        connection.query('SELECT * FROM userData WHERE pid = ' + connection.escape(userData.pid), (err, results, fields) => {
+        var updateData = {
+            pid : userData.pid
+        };
+        var pid = userData.pid;
+        if (userData.zip.match(/[0-9]/) && userData.zip.length == 5) {
+            updateData.zip = userData.zip;
+        } 
+        if (!userData.phone != '') {
+            var tel = Array.from(userData.phone);
+            for (let m in tel) {
+                if (isNaN(tel[m])) {
+                    tel.splice(tel[m], 1);
+                }
+            }
+            if (tel.length < 12) {
+                updateData.phone
+            }
+        }
+        connection.query('SELECT * FROM userData WHERE pid = ' + connection.escape(pid), (err, results, fields) => {
             if (err) {rej(err)}
             else if (results != '') {
-                var pid = userData.pid;
-                delete userData.pid;
-                connection.query('UPDATE userData SET ? WHERE pid = ' + connection.escape(pid), userData, (err, results, fields) => {
+                connection.query('UPDATE userData SET ? WHERE pid = ' + connection.escape(pid), updateData, (err, results, fields) => {
                     if (err) {rej(err)}
                     else {
                         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), {setup : 1}, (err, results, fields) => {
@@ -245,10 +200,10 @@ exports.userDataUpd = userData => {
                     }
                 })
             } else if (results == '') {
-                connection.query('INSERT INTO userData SET ?', userData, (err, results, fields) => {
+                connection.query('INSERT INTO userData SET ?', updateData, (err, results, fields) => {
                     if (err) {rej(err)}
                     else {
-                        connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(userData.pid), {setup : 1}, (err, results, fields) => {
+                        connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), {setup : 1}, (err, results, fields) => {
                             if (err) {rej(err)}
                             else {
                                 res(200);
@@ -288,12 +243,13 @@ exports.checkToken = token => {
     });
 }
 
-//Insert password reset token from passwd module
+//Insert password reset or email reset token from passwd module
 exports.resPass = (pid, ptoken) => {
+    console.log(pid, ptoken);
     return new Promise ((res, rej) => {
         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), ptoken, (err, updates, fields) => {
             if (err) rej (err);
-            console.log(updates);
+            console.log(ptoken);
             res(200);
         })
     })

@@ -7,3 +7,4 @@ node_modules/
 #Runtimes
 *.pid
 package-lock.json
+*.j.js

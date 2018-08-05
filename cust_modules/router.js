@@ -330,7 +330,8 @@ module.exports = (app) => {
             }, reason => {
                 res.status(reason.code).send(reason.error);
             }).catch(err => {
-                res.send(err);
+                console.log(err);
+                res.sendStatus(500).send(err);
             })
         }).catch(err => {
             res.send(err);
@@ -375,23 +376,24 @@ module.exports = (app) => {
 
     //Process first login form.
     app.post('/users/moreinfo/', (req, res) => {
-        if (!req.body.pid) {
-            res.redirect('/login/');
-        } else {
-            authenticate.userDataUpd(req.body)
-            .then(resolved => {
-                res.redirect('/');
-            }, reason => {
-                console.log(reason);
-                res.render('moreinfo', {
-                    title : 'An error occured',
-                    auth : auth
-                })
-            }).catch(err => {
-                console.log(err); 
-                res.redirect('/login');
-            })
+        var updInfo = {
+            pid : auth.user,
+            phone : req.body.phone,
+            zip : req.body.zip
         }
+        authenticate.userDataUpd(updInfo)
+        .then(resolved => {
+            res.redirect('/');
+        }, reason => {
+            console.log(reason);
+            res.render('moreinfo', {
+                title : 'An error occured',
+                auth : auth
+            })
+        }).catch(err => {
+            console.log(err); 
+            res.redirect('/login');
+        })
     })
     
     //Send out password email
