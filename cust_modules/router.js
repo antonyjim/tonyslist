@@ -487,7 +487,6 @@ module.exports = (app) => {
                 let newPath = '/home/aj/Desktop/newnode/public/images/' + fields.postPid;
                 checkDir(newPath)
                 .then(resolved => {
-
                     for (let i = 0; i < Object.keys(files).length; i++) {
                         let tag = 'img' + (i + 1);
                         fs.rename(files[tag].path, resolved + '/' + tag + '.jpg', (err) => {
@@ -505,21 +504,21 @@ module.exports = (app) => {
                     console.log('No files found');
                     reso(fields);
                 }
-                
             });
 
         })
         .then(resit => {
+            console.log(resit);
             fields = resit;
             fields.pid = auth.user;
             if (req.query.sub == 'true') {
                 fields.created_on = new Date();
-                let path = '/home/aj/Desktop/newnode/public/images/' + fields.post_pid;
-                console.log('Converting...')
-                childProcess.exec('convert -thumbnail 250 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
-                    if(err) throw err;
-                })
             };
+            let path = '/home/aj/Desktop/newnode/public/images/' + fields.postPid;
+            console.log('Converting...')
+            childProcess.exec('convert -thumbnail 250 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
+                if(err) throw err;
+            })
             authenticate.updatePost(fields)
             .then (resolved => {
                 if (req.query.sub == 'true') {

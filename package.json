@@ -11,7 +11,10 @@
     "formidable": "^1.2.1",
     "jsonwebtoken": "^8.3.0",
     "nodemailer": "^4.6.7",
+<<<<<<< HEAD
     "nodemon": "^1.18.3",
+=======
+>>>>>>> 29a7c433942fe7f4898065fe70478c05346eae76
     "uuid": "^3.2.1"
   },
   "devDependencies": {

@@ -111,8 +111,8 @@
 
     function queryfy(obj) {
         if (typeof(obj) != 'object') {
-            return 1;
             console.error('An object must be supplied');
+            return 1;
         }
         var qstring = '?';
         for (let m in obj) {
@@ -133,6 +133,7 @@
 
     function save() {
         var f = 0;       
+        var g;
         var iframe = document.getElementById('preview');
         var id = document.getElementById('postPid');
         
@@ -145,9 +146,10 @@
         }
 
         var k = document.querySelectorAll('.active');
-        for (let m in k) {
-            if (k[m].checked) {
-                g = k[m].value;
+        for (let m of k) {
+            if (m.checked) {
+                g = m.value;
+                break;
             }
         }
 
@@ -158,8 +160,7 @@
             desc = document.getElementById('desc'),
             contact = document.getElementById('contact'),
             postPid = document.getElementById('postPid'),
-            post = f,
-            active = g
+            post = f
         ;
 
         var  images = document.querySelectorAll('.input');
@@ -171,6 +172,7 @@
         formData.append('contact', contact.value);
         formData.append('postPid', postPid.value);
         formData.append('post', f);
+        formData.append('active', g);
         
         if (images.length > 1) {
             for (let m of images) {

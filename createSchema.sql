@@ -29,9 +29,17 @@
 -- userData table
 
     CREATE TABLE IF NOT EXISTS `userData` (
-        `pid` CHAR(8) NOT NULL PRIMARY KEY,
+        `usnum` INT NOT NULL PRIMARY KEY,
+        `pid` CHAR(8) NOT NULL,
         `phone` INT(11),
-        `zip` INT(9)
+        `zip` INT(9),
+
+        INDEX (`pid`),
+
+        FOREIGN KEY (`pid`) 
+            REFERENCES `users`(`pid`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
     );
 
 -- post table
@@ -45,10 +53,17 @@
         `desc` VARCHAR(1000),
         `contact` INT(11),
         `price` INT(7),
-        `createOn` DATETIME,
+        `createdOn` DATETIME,
         `lastViewed` DATETIME,
         `viewCount` INT(7),
-        `active` BOOLEAN NOT NULL
+        `active` BOOLEAN NOT NULL,
+
+        INDEX (`pid`),
+
+        FOREIGN KEY (`pid`) 
+            REFERENCES `users`(`pid`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
     );
 
 -- news table
@@ -60,5 +75,12 @@
         `body` VARCHAR(2000),
         `createdOn` DATETIME,
         `lastViewed` DATETIME,
-        `active` BOOLEAN
+        `active` BOOLEAN,
+
+        INDEX (`ownder`),
+
+        FOREIGN KEY (`pid`) 
+            REFERENCES `users`(`pid`)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
     );
