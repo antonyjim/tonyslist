@@ -27,7 +27,7 @@ exports.reset = email => {
         var jwtoken = jwt.sign(ptoken, secret, {expiresIn: '1h'});
         var message = {
             from : 'vtaesmnsnk5vdlw2@ethereal.email',
-            to : resolved.username,
+            to : resolved.email,
             subject : 'Password Reset',
             html : '<a style="bold" href="localhost:8080/users/forgot/?ptoken=' + jwtoken + '"> Click Here to Reset Password </a>'
         }

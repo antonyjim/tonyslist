@@ -20,7 +20,7 @@ var advertmod = () => {
 //Format JSON data into actual inputs. Refer to /public/layouts/*.json 
 //to see what I'm working with here
 var populateFields = fields => {
-    document.getElementById('title').innerHTML = fields.title;
+    document.getElementById('mod-modal-title').innerHTML = fields.title;
     var root = document.getElementById('mod-body');
     while (root.firstChild) {
         root.removeChild(root.firstChild);
