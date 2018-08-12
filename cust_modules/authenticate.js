@@ -249,7 +249,6 @@ exports.resPass = (pid, ptoken) => {
     return new Promise ((res, rej) => {
         connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), ptoken, (err, updates, fields) => {
             if (err) rej (err);
-            console.log(ptoken);
             res(200);
         })
     })
@@ -261,7 +260,6 @@ exports.verResPass = (ptoken) => {
         connection.query('SELECT * FROM users WHERE ptoken = ' + connection.escape(ptoken), (err, results, fields) => {
             if (err) rej(err);
             if (results == '') {
-                console.log('Empty');
                 rej(404);
             } else {
                 res(results[0]);

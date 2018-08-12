@@ -548,7 +548,7 @@ module.exports = (app) => {
 function checkDir (dir) {
     return new Promise ((res, rej) => {
         fs.stat(dir, (err, stats) => {
-            if (err && err.errno == -2) {
+            if (err && err.errno == -2 || err && err.errno == -4058) {
                 console.log(err);
                 fs.mkdirSync(dir);
                 res(dir);
