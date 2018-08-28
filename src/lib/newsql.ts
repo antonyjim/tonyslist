@@ -1,9 +1,12 @@
 var mysql = require('mysql');
 var fs = require('fs');
 var passwd = require('./passwd.js');
-var uuidv4 = require('uuid/v4');
+// var uuidv4 = require('uuid/v4');
 var secrets = require('./boxofsecrets.j.js');
 var connection = mysql.createConnection(secrets.connection);
+
+// Types
+import { Promise } from 'es6-promise';
 
 exports.getList = conditions => {
     return new Promise ((res, rej) => {
@@ -37,5 +40,3 @@ exports.updNews = newNews => {
         })  
     })
 }
-
-

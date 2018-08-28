@@ -1,16 +1,16 @@
+
 var express = require('express');
 var authenticate = require('./authenticate');
 var frm = require('formidable');
 var uuidv4 = require('uuid/v4');
-var gr = require('./global_resources');
+
+// Types
+import { MidAuth, PostCond } from '../typings/core';
+import { Promise } from 'es6-promise';
 
 var router = express.Router();
 
-var auth= {
-    auth : false,
-    user : null,
-    cookie : null
-};
+let auth: MidAuth
 
 router.use((req, res, next) => {
     if (req.cookies.auth) {
@@ -39,7 +39,7 @@ router.use((req, res, next) => {
 
 //Main post listing screen.
 router.get('/', (req, res) => {
-    var conditions = {};
+    var conditions: PostCond;
     if (req.query.cat) {
         conditions.active = true;
         conditions.post = req.query.cat.split(' ');
@@ -55,10 +55,10 @@ router.get('/', (req, res) => {
     getting.then(results => {
         if (results.length == 1) {
             authenticate.getPost(results[0].postPid)
-            .then (resolved => {
+            .then (resolve => {
                 res.render('indivpost', {
-                    title : resolved.title,
-                    post: resolved,
+                    title : resolve.title,
+                    post: resolve,
                     auth : auth
                 })
             }, rejected => {
@@ -114,11 +114,11 @@ router.get('/edit/', (req, res) => {
     } else if (req.query.pid) {
         var f = authenticate.getPost(req.query.pid);
 
-        f.then(resolved => {
-            if (resolved.pid == auth.user) {
+        f.then(resolve => {
+            if (resolve.pid == auth.user) {
                 res.render('postedit', {
                     title : 'edit post',
-                    post : resolved,
+                    post : resolve,
                     auth : auth
                 })
             } else {
@@ -128,7 +128,7 @@ router.get('/edit/', (req, res) => {
             res.redirect('/account/?' + reason);
         }).catch (err => {res.redirect('/account/?' + err)})
     } else {
-        redirect ('/posts/');
+        res.redirect ('/posts/');
     }
 })
 
@@ -139,7 +139,7 @@ router.post('/search', (req, res) => {
     var form = new frm.IncomingForm();
     console.log('Searching...')
     new Promise ((reso, reje) => {
-        form.parse(req, (err, fields, files) => {
+        form.parse(req, (err, fields: { conditions: string }) => {
             console.log(fields);
             if (err) {reje(err)}
             else if (!fields) {
@@ -148,12 +148,12 @@ router.post('/search', (req, res) => {
                 reso(fields);
             }
         })
-    }).then(resolve => {
+    }).then((resolve: {conditions: string}) => {
         if (resolve.conditions) {
-            authenticate.searchPosts(resolve.conditions).then(resolved => {
-                JSON.stringify(resolved);
-                console.log('resolved', resolved);
-                res.send(resolved);
+            authenticate.searchPosts(resolve.conditions).then(resolve => {
+                JSON.stringify(resolve);
+                console.log('resolve', resolve);
+                res.send(resolve);
             }, reason => {
                 console.log(reason);
                 res.sendStatus(reason)

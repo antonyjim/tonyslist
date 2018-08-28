@@ -1,11 +1,17 @@
-var mysql = require('mysql');
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-var fs = require('fs');
+import * as fs from 'fs';
+import * as mysql from 'mysql';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+
+// Local Modules
 var passwd = require('./passwd.js');
 var secrets = require('./boxofsecrets.j.js');
-var connection = mysql.createConnection(secrets.connection);
 
+// Types
+import { Promise } from 'es6-promise';
+
+//Global vars
+let connection = mysql.createConnection(secrets.connection);
 const secret = secrets.jwt;
 const saltRounds = secrets.salt;
 
@@ -65,7 +71,9 @@ exports.auth = function(userData) {
     var entry = new Date;
     return new Promise(function (resolve, reject) {
         var un = connection.escape(userData.email);
-        connection.query('SELECT * FROM users WHERE username = ' + un +' OR newEmail = ' + un, function (err, results, fields) {
+        connection.query(
+            'SELECT pid, username, pass, email, newEmail, givenName, famName, userlevel, ptoken, emailReset, deletion, active, setup FROM users WHERE username = ' + un +' OR newEmail = ' + un, 
+            function (err, results: any, fields) {
             if (err) {
                 reject(err); 
             } else if (results != '') {
@@ -95,11 +103,11 @@ exports.auth = function(userData) {
                                 reject(403);
                             }
                         });
-                    }).then(function (res) {
-                        if (res.setup == 1) {
+                    }).then(function (resolved: any) {
+                        if (resolved.setup == 1) {
                             var payload = {
-                                user: res.pid,
-                                userlevel: res.userlevel
+                                user: resolved.pid,
+                                userlevel: resolved.userlevel
                             };
                             var token = jwt.sign(payload, secret, {
                                 expiresIn: '1h'
@@ -107,8 +115,8 @@ exports.auth = function(userData) {
                             resolve(token);
                         } else {
                             var payload = {
-                                user: res.pid,
-                                userlevel: res.userlevel
+                                user: resolved.pid,
+                                userlevel: resolved.userlevel
                             };
                             var token = jwt.sign(payload, secret, {
                                 expiresIn: '1h'
@@ -168,14 +176,17 @@ exports.userDataGet = pid => {
 exports.userDataUpd = userData => {
     return new Promise((res, rej) => {
         var updateData = {
-            pid : userData.pid
+            pid : userData.pid,
+            zip : "",
+            phone: ""
         };
         var pid = userData.pid;
         if (userData.zip.match(/[0-9]/) && userData.zip.length == 5) {
             updateData.zip = userData.zip;
         } 
-        if (!userData.phone != '') {
-            var tel = Array.from(userData.phone);
+        if (userData.phone != '') {
+            //var tel = Array.from(userData.phone);
+            let tel = userData.phone.split('');
             for (let m in tel) {
                 if (isNaN(tel[m])) {
                     tel.splice(tel[m], 1);
@@ -436,7 +447,7 @@ exports.updatePost = data => {
 // ?pid=randomstring
 exports.getPost = postPid => {
     return  new Promise ((res, rej) => {
-        var j = new Promise((ress, rejj) => {
+        new Promise((ress, rejj) => {
             connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(postPid), (err, results, fields) => {
                 if (err) {rej(err)};
                 if (results == '') {
@@ -450,12 +461,12 @@ exports.getPost = postPid => {
                 }
             })
         })
-       
-        j.then (resss => {
-            var newPath = '/home/aj/Desktop/newnode/public/images/' + resss[0].postPid;
-            var dir = checkDir(newPath);
-            dir.then (resolu => {
-                var filed = fs.readdirSync(resolu)
+       .then (resss => {
+            let newPath: fs.PathLike;
+            newPath = `/home/aj/Desktop/newnode/public/images/${resss[0].postPid}`;
+            checkDir(newPath)
+            .then ((resolu: fs.PathLike) => {
+                let filed = fs.readdirSync(resolu);
                 resss[0].images = filed;
                 res(resss[0]);
             })
@@ -508,7 +519,9 @@ exports.getList = (conditions) => {
 //List posts associated with account in the /account menu
 exports.getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+        connection.query(
+            'SELECT * FROM post WHERE ? ORDER BY ACTIVE', 
+            conditions, (err, results, fields) => {
             if (err) rej(err);
             let posts = [],
                 inactPosts = [];
@@ -521,9 +534,12 @@ exports.getAcctPost = (conditions) => {
             }
             var returns = {
                 posts: posts,
-                inactPosts : inactPosts
+                inactPosts : inactPosts,
+                news: {}
             }
-            connection.query('SELECT * FROM news WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+            connection.query(
+                'SELECT * FROM news WHERE ? ORDER BY ACTIVE', 
+                conditions, (err, results, fields) => {
                 if (err) rej(err);
                 returns.news = results;
                 res(returns)
@@ -547,7 +563,10 @@ exports.searchPosts = conditions => {
 //Load the 6 most recent posts for the homepage
 exports.getHot = () => {
     return new Promise ((res, rej) => {
-        var all = {}
+        var all = {
+            results: {},
+            categories: {}
+        }
         connection.query('SELECT postPid, title, zip, price FROM post LIMIT 6', (err, results, fields) => {
             if (err) rej(err);
             connection.query('SELECT DISTINCT post FROM post', (err, categories, fields) => {

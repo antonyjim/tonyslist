@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "outDir": "",
+        "rootDir" : "src/",
+        "removeComments": true,
+        "lib" : [
+            "es6"
+        ],
+        "types" : [
+            "node",
+            "bcrypt",
+            "body-parser",
+            "es6-promise",
+            "express",
+            "mysql",
+            "uuid"
+        ]
+    }, 
+    "include" : [
+        "src/**/*"
+    ],
+    "exclude" : [
+        "node_modules"
+    ]
+}

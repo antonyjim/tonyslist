@@ -1,21 +1,28 @@
-let fs = require('fs');
+// Core Node Modules
+import * as fs from 'fs';
+import * as path from 'path';
+import * as childProcess from 'child_process';
+
+// NPM Modules
 let bodyParser = require('body-parser');
 let cookieParser = require('cookie-parser');
+let uuidv4 = require('uuid/v4');
+let frm = require('formidable');
+
+// Local Modules
 let authenticate = require('./authenticate');
 let gr = require('./global_resources');
 let passwd = require('./passwd.js');
-let uuidv4 = require('uuid/v4');
-let frm = require('formidable');
-let childProcess = require('child_process');
 let posts = require('./posts');
 let news = require('./news');
-let auth= {
-    auth : false,
-    user : null,
-    cookie : null
-},
-path = require('path'),
-password = 0;
+
+// Types
+import { MidAuth } from '../typings/core';
+import { Promise } from 'es6-promise';
+
+//Global Namespace
+let auth: MidAuth;
+
 
 module.exports = (app) => {
 
@@ -85,7 +92,7 @@ module.exports = (app) => {
 
     //Registration Screen
     app.get('/register', (req, res) => {
-        fs.readFile('./public/layouts/register.json', (err, data) => {
+        fs.readFile('./public/layouts/register.json', 'utf8', (err, data) => {
             if (err) {
                 res.render('500', {
                     title : '500 Server Error',
@@ -126,7 +133,7 @@ module.exports = (app) => {
                 res.redirect('/login?err=' + resolved)
             }, reason => {
                 res.redirect('/login?err=' + reason);
-            }).catch(err => {res.redirect('/login?err=' + reason)})
+            }).catch(err => {res.redirect('/login?err=' + err)})
         } else {
             res.redirect('/login?err=notoken');
         }
@@ -234,7 +241,7 @@ module.exports = (app) => {
         }).then(resolved => {
             authenticate.userDataGet(auth.user)
             .then(reso => {
-                let oi = JSON.parse(resolved);
+                let oi = JSON.parse(reso);
                 oi.inputs[0].otherAct = reso.zip;
                 oi.inputs[1].otherAct = reso.phone;
                 res.send(JSON.stringify(oi));
@@ -245,7 +252,7 @@ module.exports = (app) => {
                 console.log(err);
             })
         } , reason => {
-            conosle.log('Sent');
+            console.log('Sent');
             res.sendStatus(reason.errno);
         }).catch(err => {
             console.log(err);
@@ -511,6 +518,7 @@ module.exports = (app) => {
         })
         .then(resit => {
             console.log(resit);
+            let fields;
             fields = resit;
             fields.pid = auth.user;
             if (req.query.sub == 'true') {

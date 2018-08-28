@@ -1,8 +1,10 @@
-var authenticate = require('./authenticate.js');
-var nodemailer = require('nodemailer');
-var uuidv4 = require('uuid/v4');
-var jwt = require('jsonwebtoken');
-var secrets = require('./boxofsecrets.j.js');
+let authenticate = require('./authenticate');
+let nodemailer = require('nodemailer');
+let uuidv4 = require('uuid/v4');
+let jwt = require('jsonwebtoken');
+// let secrets = require('./boxofsecrets.j.js');
+
+import { Promise } from 'es6-promise';
 
 
 
@@ -133,7 +135,7 @@ exports.delete = (user, token) => {
         transporter.sendMail(message, (err) => {
             if (err) rej(err);
             res(200);
-            console.log('Successfully sent ', message ,' to ', email);
+            console.log('Successfully sent ', message ,' to ', user.email);
         })
     })
 }
