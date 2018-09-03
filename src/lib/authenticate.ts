@@ -1,18 +1,25 @@
-var mysql = require('mysql');
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-var fs = require('fs');
+import * as fs from 'fs';
+import * as mysql from 'mysql';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+
+// Local Modules
 var passwd = require('./passwd.js');
 var secrets = require('./boxofsecrets.j.js');
-var connection = mysql.createConnection(secrets.connection);
 
+// Types
+import { Promise } from 'es6-promise';
+import { AuthPayload } from './../typings/core'
+
+//Global vars
+let connection = mysql.createConnection(secrets.connection);
 const secret = secrets.jwt;
 const saltRounds = secrets.salt;
 
 //User functions
 
 //Registration Action
-exports.add = (newUser)=>{
+let add = (newUser)=>{
     var query = new Promise ((resolve, reject) => {
         connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.username), 
             (err, results, fields) => {
@@ -61,11 +68,13 @@ exports.add = (newUser)=>{
 };
 
 //Initial Sign on Authentication
-exports.auth = function(userData) {
+let authenticate = function(userData) {
     var entry = new Date;
     return new Promise(function (resolve, reject) {
         var un = connection.escape(userData.email);
-        connection.query('SELECT * FROM users WHERE username = ' + un +' OR newEmail = ' + un, function (err, results, fields) {
+        connection.query(
+            'SELECT pid, username, pass, email, newEmail, givenName, famName, userlevel, ptoken, emailReset, deletion, active, setup FROM users WHERE username = ' + un +' OR newEmail = ' + un, 
+            function (err, results: any, fields) {
             if (err) {
                 reject(err); 
             } else if (results != '') {
@@ -75,9 +84,12 @@ exports.auth = function(userData) {
                     new Promise(function (resolve, reject) {
                         var loginMsg = '';
                         if (results[0].newEmail != ' ' && userData.email != results[0].newEmail) {
-                            connection.query('UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), {newEmail : '', emailReset : ''}, (err, results, fields) => {
-                                if (err) {reject(err)};
-                                loginMsg = 'Your email has been reverted to what it used to be because you did not verify your new email.';
+                            connection.query(
+                                'UPDATE users SET ? WHERE username = ' + connection.escape(userData.email), 
+                                {newEmail : '', emailReset : ''}, 
+                                (err, results, fields) => {
+                                    if (err) {reject(err)};
+                                    loginMsg = 'Your email has been reverted to what it used to be because you did not verify your new email.';
                             })
                         } else {
                             reject(470);
@@ -95,11 +107,11 @@ exports.auth = function(userData) {
                                 reject(403);
                             }
                         });
-                    }).then(function (res) {
-                        if (res.setup == 1) {
+                    }).then(function (resolved: any) {
+                        if (resolved.setup == 1) {
                             var payload = {
-                                user: res.pid,
-                                userlevel: res.userlevel
+                                user: resolved.pid,
+                                userlevel: resolved.userlevel
                             };
                             var token = jwt.sign(payload, secret, {
                                 expiresIn: '1h'
@@ -107,8 +119,8 @@ exports.auth = function(userData) {
                             resolve(token);
                         } else {
                             var payload = {
-                                user: res.pid,
-                                userlevel: res.userlevel
+                                user: resolved.pid,
+                                userlevel: resolved.userlevel
                             };
                             var token = jwt.sign(payload, secret, {
                                 expiresIn: '1h'
@@ -136,7 +148,7 @@ exports.auth = function(userData) {
 };
 
 //Check the existence of a username from registration screen
-exports.checkExist = function (username) {
+let checkExist = function (username) {
     return new Promise(function (resolve, reject) {
         connection.query('SELECT username, old_username FROM users WHERE username = ' + connection.escape(username), function (err, results, fields) {
             if (err) {
@@ -151,7 +163,7 @@ exports.checkExist = function (username) {
 }
 
 //Get data from userData table
-exports.userDataGet = pid => {
+let userDataGet = pid => {
     return new Promise((res, rej) => {
         connection.query('SELECT phone, zip, pid FROM userData WHERE pid = ' + connection.escape(pid), (err, results, fields) => {
             if (err) {rej(err)}
@@ -165,17 +177,20 @@ exports.userDataGet = pid => {
 }
 
 //Update data in the userData table
-exports.userDataUpd = userData => {
+let userDataUpd = userData => {
     return new Promise((res, rej) => {
         var updateData = {
-            pid : userData.pid
+            pid : userData.pid,
+            zip : "",
+            phone: ""
         };
         var pid = userData.pid;
         if (userData.zip.match(/[0-9]/) && userData.zip.length == 5) {
             updateData.zip = userData.zip;
         } 
-        if (!userData.phone != '') {
-            var tel = Array.from(userData.phone);
+        if (userData.phone != '') {
+            //var tel = Array.from(userData.phone);
+            let tel = userData.phone.split('');
             for (let m in tel) {
                 if (isNaN(tel[m])) {
                     tel.splice(tel[m], 1);
@@ -217,7 +232,7 @@ exports.userDataUpd = userData => {
 }
 
 //Verify token on incoming auth cookie
-exports.checkToken = token => {
+let checkToken = token => {
     return new Promise ((res, rej) => {
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {rej(err.message)}
@@ -229,7 +244,7 @@ exports.checkToken = token => {
                     zip : decoded.zip
                 };
                 var ntoken = jwt.sign(payload, secret, {expiresIn: '1h'});
-                var resolved = {
+                var resolved: AuthPayload = {
                     auth : true,
                     pid : decoded.user,
                     userlevel : decoded.userlevel,
@@ -243,33 +258,8 @@ exports.checkToken = token => {
     });
 }
 
-//Insert password reset or email reset token from passwd module
-exports.resPass = (pid, ptoken) => {
-    console.log(pid, ptoken);
-    return new Promise ((res, rej) => {
-        connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(pid), ptoken, (err, updates, fields) => {
-            if (err) rej (err);
-            res(200);
-        })
-    })
-} 
-
-//Verify the email jwt for password reset
-exports.verResPass = (ptoken) => {
-    return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM users WHERE ptoken = ' + connection.escape(ptoken), (err, results, fields) => {
-            if (err) rej(err);
-            if (results == '') {
-                rej(404);
-            } else {
-                res(results[0]);
-            }
-        })
-    })
-}
-
 //Change the password after verifying reset token
-exports.forcePass = (pass, pid) => {
+let forcePass = (pass, pid) => {
     return new Promise ((res, rej) => {
         bcrypt.hash(pass, saltRounds, (err, hash) => {
             if (err) rej(err);
@@ -283,7 +273,7 @@ exports.forcePass = (pass, pid) => {
 }
 
 //Enter in the email verification
-exports.verEmail = (ptoken, pid) => {
+let verEmail = (ptoken, pid) => {
     return new Promise ((res, rej) => {
         connection.query('SELECT pid, username FROM users WHERE emailReset = ' + connection.escape(ptoken), (err, results, fields) => {
                 if (err) rej(err);
@@ -301,7 +291,7 @@ exports.verEmail = (ptoken, pid) => {
 }
 
 //Update either the password, email or delete the account.
-exports.updInfo = (info) => {
+let updInfo = (info) => {
     return new Promise ((res, rej) => {
         connection.query('SELECT pid, pass, username, deletion FROM users WHERE pid = ' + connection.escape(info.pid), (err, results, fields) => {
             if (err) {rej(err)}
@@ -388,7 +378,7 @@ exports.updInfo = (info) => {
 
 //If the user clicks the link in the confirmation email, 
 //if the user logs in it will delete the token anyways.
-exports.cancelDelete = token => {
+let cancelDelete = token => {
     return new Promise((res, rej) => {
         passwd.cancelDelete(token).then(resolved => {
             connection.query('UPDATE users SET ? WHERE pid = ' + connection.escape(resolved.pid), 
@@ -411,7 +401,7 @@ exports.cancelDelete = token => {
 //Post functions
 
 //Update post details from account menu
-exports.updatePost = data => {
+let updatePost = data => {
     console.log(data);
     return new Promise ((res, rej) => {
         connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(data.postPid), (err, results, fields) => {
@@ -434,9 +424,9 @@ exports.updatePost = data => {
 
 //Get an individual post from a req.url in the form of:
 // ?pid=randomstring
-exports.getPost = postPid => {
+let getPost = postPid => {
     return  new Promise ((res, rej) => {
-        var j = new Promise((ress, rejj) => {
+        new Promise((ress, rejj) => {
             connection.query('SELECT * FROM post WHERE postPid = ' + connection.escape(postPid), (err, results, fields) => {
                 if (err) {rej(err)};
                 if (results == '') {
@@ -450,12 +440,12 @@ exports.getPost = postPid => {
                 }
             })
         })
-       
-        j.then (resss => {
-            var newPath = '/home/aj/Desktop/newnode/public/images/' + resss[0].postPid;
-            var dir = checkDir(newPath);
-            dir.then (resolu => {
-                var filed = fs.readdirSync(resolu)
+       .then (resss => {
+            let newPath: fs.PathLike;
+            newPath = `/home/aj/Desktop/newnode/public/images/${resss[0].postPid}`;
+            checkDir(newPath)
+            .then ((resolu: fs.PathLike) => {
+                let filed = fs.readdirSync(resolu);
                 resss[0].images = filed;
                 res(resss[0]);
             })
@@ -482,7 +472,7 @@ exports.getPost = postPid => {
 
 //Get posts for the main /posts screen,
 //if there is only 1 result, redirect to individual post screen.
-exports.getList = (conditions) => {
+let getList = (conditions) => {
     var post = '';
     if (conditions.post) {
         for (let m in conditions.post) {
@@ -506,9 +496,11 @@ exports.getList = (conditions) => {
 }
 
 //List posts associated with account in the /account menu
-exports.getAcctPost = (conditions) => {
+let getAcctPost = (conditions) => {
     return new Promise ((res, rej) => {
-        connection.query('SELECT * FROM post WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+        connection.query(
+            'SELECT * FROM post WHERE ? ORDER BY ACTIVE', 
+            conditions, (err, results, fields) => {
             if (err) rej(err);
             let posts = [],
                 inactPosts = [];
@@ -521,9 +513,12 @@ exports.getAcctPost = (conditions) => {
             }
             var returns = {
                 posts: posts,
-                inactPosts : inactPosts
+                inactPosts : inactPosts,
+                news: {}
             }
-            connection.query('SELECT * FROM news WHERE ? ORDER BY ACTIVE', conditions, (err, results, fields) => {
+            connection.query(
+                'SELECT * FROM news WHERE ? ORDER BY ACTIVE', 
+                conditions, (err, results, fields) => {
                 if (err) rej(err);
                 returns.news = results;
                 res(returns)
@@ -533,7 +528,7 @@ exports.getAcctPost = (conditions) => {
 }
 
 //Search
-exports.searchPosts = conditions => {
+let searchPosts = conditions => {
     return new Promise ((res, rej) => {
         var query = connection.escape('%' + conditions + '%');
         connection.query('SELECT title, zip, post, postPid, price FROM post WHERE desc LIKE ' + query, (err, results, fields) => {
@@ -545,9 +540,12 @@ exports.searchPosts = conditions => {
 }
 
 //Load the 6 most recent posts for the homepage
-exports.getHot = () => {
+let getHot = () => {
     return new Promise ((res, rej) => {
-        var all = {}
+        var all = {
+            results: {},
+            categories: {}
+        }
         connection.query('SELECT postPid, title, zip, price FROM post LIMIT 6', (err, results, fields) => {
             if (err) rej(err);
             connection.query('SELECT DISTINCT post FROM post', (err, categories, fields) => {
@@ -559,3 +557,22 @@ exports.getHot = () => {
         })
     })
 }
+
+export { 
+     getHot,
+     getAcctPost, 
+     getList, 
+     getPost, 
+     searchPosts, 
+     updatePost, 
+     cancelDelete, 
+     updInfo,
+     add,
+     authenticate,
+     verEmail,
+     checkExist,
+     userDataGet,
+     userDataUpd,
+     checkToken,
+     forcePass
+    }

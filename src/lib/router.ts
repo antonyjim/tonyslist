@@ -1,21 +1,45 @@
-let fs = require('fs');
-let bodyParser = require('body-parser');
-let cookieParser = require('cookie-parser');
-let authenticate = require('./authenticate');
+// Core Node Modules
+import * as fs from 'fs';
+import * as path from 'path';
+import * as childProcess from 'child_process';
+
+// NPM Modules
+import * as bodyParser from 'body-parser';
+import * as cookieParser from 'cookie-parser';
+import * as uuidv4 from 'uuid/v4';
+import * as frm from 'formidable';
+
+// Local Modules
+import { 
+    getHot,
+    add, 
+    authenticate, 
+    checkToken,
+    getAcctPost,
+    cancelDelete,
+    userDataGet,
+    userDataUpd,
+    getPost,
+    forcePass,
+    updatePost,
+    updInfo
+ } from './authenticate';
+
 let gr = require('./global_resources');
 let passwd = require('./passwd.js');
-let uuidv4 = require('uuid/v4');
-let frm = require('formidable');
-let childProcess = require('child_process');
 let posts = require('./posts');
 let news = require('./news');
-let auth= {
-    auth : false,
-    user : null,
-    cookie : null
-},
-path = require('path'),
-password = 0;
+
+// Types
+import { 
+    AuthPayload,
+    Post
+ } from '../typings/core';
+import { Promise } from 'es6-promise';
+
+//Global Namespace
+var auth: AuthPayload;
+
 
 module.exports = (app) => {
 
@@ -26,10 +50,10 @@ module.exports = (app) => {
     //Authentication Middleware
     app.use((req, res, next) => {
         if (req.cookies.auth) {
-            authenticate.checkToken(req.cookies.auth)
-            .then (resolve => {
+            checkToken(req.cookies.auth)
+            .then ((resolve: AuthPayload) => {
                 auth.auth = resolve.auth;
-                auth.user = resolve.pid;
+                auth.pid = resolve.pid;
                 auth.userlevel = resolve.userlevel;
                 res.cookie('auth', resolve.cookie);
                 next();
@@ -66,7 +90,7 @@ module.exports = (app) => {
     //Fairly straightforward homepage. In the future I will utilize ejs
     //caching so there isn't an sql query everytime the page is called.
     app.get('/', (req, res) => {
-        authenticate.getHot()
+        getHot()
         .then(resolved => {
             res.render('index', {
                 title : 'tonyslist',
@@ -85,7 +109,7 @@ module.exports = (app) => {
 
     //Registration Screen
     app.get('/register', (req, res) => {
-        fs.readFile('./public/layouts/register.json', (err, data) => {
+        fs.readFile('./public/layouts/register.json', 'utf8', (err, data) => {
             if (err) {
                 res.render('500', {
                     title : '500 Server Error',
@@ -126,7 +150,7 @@ module.exports = (app) => {
                 res.redirect('/login?err=' + resolved)
             }, reason => {
                 res.redirect('/login?err=' + reason);
-            }).catch(err => {res.redirect('/login?err=' + reason)})
+            }).catch(err => {res.redirect('/login?err=' + err)})
         } else {
             res.redirect('/login?err=notoken');
         }
@@ -164,7 +188,7 @@ module.exports = (app) => {
     //Cancel deletion screen
     app.get('/users/deletion/', (req, res) => {
         if (req.query.deletion) {
-            authenticate.cancelDelete(req.query.deletion)
+            cancelDelete(req.query.deletion)
             .then(resolved => {
                 res.render('deletion', {
                     title : 'cancel delete',
@@ -198,8 +222,8 @@ module.exports = (app) => {
     //Account posts and details
     app.get('/account', (req, res) => {
         if (auth.auth) {
-            authenticate.getAcctPost({pid : auth.user})
-            .then (resolved => {
+            getAcctPost({pid : auth.pid})
+            .then ( (resolved: {posts: Post, inactPosts: Post, news: any}) => {
                 var news = null;
                 res.render('account', {
                     title : 'Account',
@@ -232,9 +256,9 @@ module.exports = (app) => {
                 }
             })
         }).then(resolved => {
-            authenticate.userDataGet(auth.user)
-            .then(reso => {
-                let oi = JSON.parse(resolved);
+            userDataGet(auth.pid)
+            .then((reso: object) => {
+                let oi = JSON.parse(reso);
                 oi.inputs[0].otherAct = reso.zip;
                 oi.inputs[1].otherAct = reso.phone;
                 res.send(JSON.stringify(oi));
@@ -245,7 +269,7 @@ module.exports = (app) => {
                 console.log(err);
             })
         } , reason => {
-            conosle.log('Sent');
+            console.log('Sent');
             res.sendStatus(reason.errno);
         }).catch(err => {
             console.log(err);
@@ -259,7 +283,7 @@ module.exports = (app) => {
     app.get('/preview', (req, res) => {
         let pid = req.query.pid;
         if (pid) {
-            authenticate.getPost(pid)
+            getPost(pid)
             .then(resolve => {
                 console.log(resolve[0]);
                 res.render('preview', {
@@ -321,7 +345,7 @@ module.exports = (app) => {
                 }
             })
         }).then (resolved => {
-            authenticate.add(resolved)
+            add(resolved)
             .then(value => {
                 res.render('addsucc', {
                     title : 'Successfully Added',
@@ -350,7 +374,7 @@ module.exports = (app) => {
                 userId: null
             }
     
-            authenticate.auth(userData)
+            authenticate(userData)
             .then((results) => {
                     res.cookie('auth', results);
                     res.redirect('/');
@@ -377,11 +401,11 @@ module.exports = (app) => {
     //Process first login form.
     app.post('/users/moreinfo/', (req, res) => {
         var updInfo = {
-            pid : auth.user,
+            pid : auth.pid,
             phone : req.body.phone,
             zip : req.body.zip
         }
-        authenticate.userDataUpd(updInfo)
+        userDataUpd(updInfo)
         .then(resolved => {
             res.redirect('/');
         }, reason => {
@@ -407,7 +431,7 @@ module.exports = (app) => {
     app.post('/users/forgot/change', (req, res) => {
         passwd.verToken(req.body.jwt)
         .then(resolved => {
-            authenticate.forcePass(req.body.pass, req.body.pid)
+            forcePass(req.body.pass, req.body.pid)
             .then(resolved1 => {
                 res.redirect('/login');
             }, reason1 => {
@@ -452,7 +476,7 @@ module.exports = (app) => {
         })
         .then(resolved => {
             console.log(resolved);
-            authenticate.updInfo(resolved)
+            updInfo(resolved)
             .then(resolved => {
                 res.status(200).send(resolved);
             }, reason => {
@@ -461,7 +485,7 @@ module.exports = (app) => {
             }).catch(err => res.status(500).send(err))
         }, reason => {
             if (reason.code == 999) {
-                authenticate.userDataUpd(reason.fields).then(resolve => {
+                userDataUpd(reason.fields).then(resolve => {
                     res.sendStatus(resolve);
                 }, reasoning => {
                     res.sendStatus(reasoning)
@@ -511,8 +535,9 @@ module.exports = (app) => {
         })
         .then(resit => {
             console.log(resit);
+            let fields;
             fields = resit;
-            fields.pid = auth.user;
+            fields.pid = auth.pid;
             if (req.query.sub == 'true') {
                 fields.created_on = new Date();
             };
@@ -521,7 +546,7 @@ module.exports = (app) => {
             childProcess.exec('convert -thumbnail 250 ' + path + '/img1.jpg ' + path + '/thmb.jpg', (err, stdout, stderr) => {
                 if(err) throw err;
             })
-            authenticate.updatePost(fields)
+            updatePost(fields)
             .then (resolved => {
                 if (req.query.sub == 'true') {
                     res.redirect(302, '/posts/?pid=' + resolved);

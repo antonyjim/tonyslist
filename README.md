@@ -22,3 +22,16 @@ So far I have learned many things from this project. It has taught me most of wh
 - Study more secure methods for performing certain tasks
 
 That being said, I had to make these mistakes before I could grow. If you decide to run this site for any reason, I highly recommend using linux. There are certain errors in Windows that I have traced down and fixed along with certain things (like imagemagick) that only works in linux.
+
+## Update 8/27/18
+
+#### TS Branch Creation
+
+The typescript branch is being created today to help me along with typescript before diving into my first big project, nodemyadmin. There will be occassional updates as I can only code when I have the time. For those looking to see a somewhat functional app, please turn to the master branch. There will be broken code published to this branch, and that's alright. 
+
+The goal with this branch is to meet some of the goals in my last update as well as:
+
+ - Have a strongly typed methodology going forward
+ - Compile my client side JS with Babel
+ - Maybe incorporate some sort of SPA
+ - Work out the many bugs that are present in the pure JS branch

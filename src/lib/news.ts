@@ -7,7 +7,12 @@ var fs = require('fs');
 var childProcess = require('child_process');
 var path = require('path');
 var router = express.Router();
-var auth = {};
+
+// Types
+import { MidAuth } from '../typings/core';
+import { Promise } from 'es6-promise';
+
+let auth: MidAuth;
 router.use((req, res, next) => {
     if (req.cookies.auth) {
         authenticate.checkToken(req.cookies.auth).then (resolve => {
@@ -47,7 +52,7 @@ router.get('/', (req, res) => {
                 news : resolved[0]
             }) 
         }, reason => {
-            console.log(err);
+            console.log(reason);
             res.render('404', {
                 title: '404 Error',
                 auth: auth
@@ -180,10 +185,10 @@ router.post('/add', (req, res) => {
                         }
                         reso(data);
                     }, reason => {
-                        rej(reason);
+                        reje(reason);
                     }).catch(err => {
                         console.log(err);
-                        rej(err.errno);
+                        reje(err.errno);
                     })
                 } else {
                     var data = {
@@ -197,6 +202,7 @@ router.post('/add', (req, res) => {
                 }
             })
         }).then(resit => {
+            let fields;
             fields = resit;
             fields.pid = auth.user;
             if(req.query.sub == 'true') {

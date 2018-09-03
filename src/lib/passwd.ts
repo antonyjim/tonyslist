@@ -1,29 +1,27 @@
-var authenticate = require('./authenticate.js');
-var nodemailer = require('nodemailer');
-var uuidv4 = require('uuid/v4');
-var jwt = require('jsonwebtoken');
-var secrets = require('./boxofsecrets.j.js');
+ // NPM Packages
+const nodemailer = require('nodemailer');
+const uuidv4 = require('uuid/v4');
+const jwt = require('jsonwebtoken');
+
+ // Local Modules
+import * as authenticate from "./authenticate";
+import { secret, transporter } from "./boxofsecrets.j";
+
+ // Types
+import { Promise } from 'es6-promise';
 
 
 
-const secret = secrets.secret;
-
-const transporter = nodemailer.createTransport(secrets.transporter);
-
-/*
-    Right now secrets.transporter just points to a fake smtp
-    client instead of gmail, which is what I would have probably
-    eventually used. 
-*/
+const mailer = nodemailer.createTransport(transporter);
 
 //Send password reset email
 exports.reset = email => {
     var ptoken = {
         ptoken : uuidv4()
     }
-    var reset = authenticate.resPass(email, ptoken);
-
-    reset.then (resolved => {
+    
+    authenticate.resPass(email, ptoken)
+    .then (resolved => {
         var jwtoken = jwt.sign(ptoken, secret, {expiresIn: '1h'});
         var message = {
             from : 'vtaesmnsnk5vdlw2@ethereal.email',
@@ -31,7 +29,7 @@ exports.reset = email => {
             subject : 'Password Reset',
             html : '<a style="bold" href="localhost:8080/users/forgot/?ptoken=' + jwtoken + '"> Click Here to Reset Password </a>'
         }
-        transporter.sendMail(message, (err) => {
+        mailer.sendMail(message, (err) => {
             if (err) throw err;
             console.log('Successfully sent ', message ,' to ', resolved.username);
         })
@@ -77,7 +75,7 @@ exports.sendVerEmail = info => {
                 subject : 'verify email',
                 html : '<a style="bold" href="localhost:8080/users/verify/?ptoken=' + jwtoken + '"> Click Here to Verify Email </a>'
             }
-            transporter.sendMail(message, (err) => {
+            mailer.sendMail(message, (err) => {
                 if (err) rej(err);
                 res(ptoken);
                 console.log('Successfully sent ', message ,' to ', info.email);
@@ -130,10 +128,10 @@ exports.delete = (user, token) => {
             `
         }
     
-        transporter.sendMail(message, (err) => {
+        mailer.sendMail(message, (err) => {
             if (err) rej(err);
             res(200);
-            console.log('Successfully sent ', message ,' to ', email);
+            console.log('Successfully sent ', message ,' to ', user.email);
         })
     })
 }
