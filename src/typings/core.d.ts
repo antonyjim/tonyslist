@@ -30,6 +30,11 @@ interface Post {
     active: boolean;
 }
 
+interface SimpleUser {
+    username: string;
+    email: string;
+}
+
 interface UserData {
     pid: string;
     username: string;
@@ -38,11 +43,18 @@ interface UserData {
     givenName: string;
     famName: string;
     userlevel: string;
+    active?: boolean;
 }
 
- export { 
-     PostCond, 
-     AuthPayload,
-     Post,
-     UserData
-     };
+interface UserLogin {
+    username: string;
+    pass: string;
+}
+
+export { 
+    PostCond, 
+    AuthPayload,
+    Post,
+    UserData,
+    UserLogin
+}

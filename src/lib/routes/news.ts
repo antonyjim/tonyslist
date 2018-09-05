@@ -6,18 +6,18 @@ var frm = require('formidable');
 var fs = require('fs');
 var childProcess = require('child_process');
 var path = require('path');
-var router = express.Router();
+var newsRoutes = express.Router();
 
 // Types
-import { MidAuth } from '../typings/core';
+import { AuthPayload } from '../../typings/core';
 import { Promise } from 'es6-promise';
 
-let auth: MidAuth;
-router.use((req, res, next) => {
+let auth: AuthPayload;
+newsRoutes.use((req, res, next) => {
     if (req.cookies.auth) {
         authenticate.checkToken(req.cookies.auth).then (resolve => {
             auth.auth = resolve.auth;
-            auth.user = resolve.pid;
+            auth.pid = resolve.pid;
             auth.userlevel = resolve.userlevel;
             res.cookie('auth', resolve.cookie);
             next();
@@ -38,7 +38,7 @@ router.use((req, res, next) => {
 
 //GET requests
 
-router.get('/', (req, res) => {
+newsRoutes.get('/', (req, res) => {
     if(req.query.pid) {
         console.log(req.query.pid);
         newsql.getList({
@@ -93,7 +93,7 @@ router.get('/', (req, res) => {
     }
 })
 
-router.get('/add', (req, res) => {
+newsRoutes.get('/add', (req, res) => {
     if (!auth.auth || auth.userlevel < 2) {
         console.log(auth);
         res.redirect('/');
@@ -106,7 +106,7 @@ router.get('/add', (req, res) => {
     }
 })
 
-router.get('/edit', (req, res) => {
+newsRoutes.get('/edit', (req, res) => {
     if (!req.query.pid) {
         res.redirect('/account');
     } else {
@@ -133,7 +133,7 @@ router.get('/edit', (req, res) => {
     }
 })
 
-router.get('/preview', (req, res) => {
+newsRoutes.get('/preview', (req, res) => {
     if (!req.query.pid) {
         res.render('newspreview', {
             news : ''
@@ -158,7 +158,7 @@ router.get('/preview', (req, res) => {
 
 //POST requests
 
-router.post('/add', (req, res) => {
+newsRoutes.post('/add', (req, res) => {
     if (!auth.auth || auth.userlevel < 2) {
         res.sendStatus(403);
     } else {
@@ -181,7 +181,7 @@ router.post('/add', (req, res) => {
                             pid : fields.pid,
                             title : fields.title,
                             body : fields.body,
-                            owner : auth.user
+                            owner : auth.pid
                         }
                         reso(data);
                     }, reason => {
@@ -195,7 +195,7 @@ router.post('/add', (req, res) => {
                         pid : fields.pid,
                         title : fields.title,
                         body : fields.body,
-                        owner : auth.user,
+                        owner : auth.pid,
                         createdOn : new Date()
                     }
                     reso(data);
@@ -204,7 +204,7 @@ router.post('/add', (req, res) => {
         }).then(resit => {
             let fields;
             fields = resit;
-            fields.pid = auth.user;
+            fields.pid = auth.pid;
             if(req.query.sub == 'true') {
                 fields.active = 1;
                 fields.createdOn = new Date();
@@ -230,7 +230,7 @@ router.post('/add', (req, res) => {
     }
 })
 
-module.exports = router;
+export { newsRoutes }
 
 //When creating the directories for news images, will mkdir if it does not already exist.
 function checkDir (dir) {

@@ -12,6 +12,7 @@
     CREATE TABLE IF NOT EXISTS `users` (
         `pid` CHAR(8) NOT NULL PRIMARY KEY,
         `username` VARCHAR(20) NOT NULL,
+        `oldUsername` VARCHAR(20),
         `pass` VARCHAR(60) NOT NULL,
         `email` VARCHAR(320) NOT NULL,
         `newEmail` VARCHAR(320),

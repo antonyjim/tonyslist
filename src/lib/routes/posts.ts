@@ -5,14 +5,14 @@ var frm = require('formidable');
 var uuidv4 = require('uuid/v4');
 
 // Types
-import { PostCond, AuthPayload } from '../typings/core';
+import { PostCond, AuthPayload } from '../../typings/core';
 import { Promise } from 'es6-promise';
 
-var router = express.Router();
+var postRoutes = express.Router();
 
 let auth: AuthPayload
 
-router.use((req, res, next) => {
+postRoutes.use((req, res, next) => {
     if (req.cookies.auth) {
         var authedd = authenticate.checkToken(req.cookies.auth);
         
@@ -38,7 +38,7 @@ router.use((req, res, next) => {
 });
 
 //Main post listing screen.
-router.get('/', (req, res) => {
+postRoutes.get('/', (req, res) => {
     var conditions: PostCond;
     if (req.query.cat) {
         conditions.active = true;
@@ -90,7 +90,7 @@ router.get('/', (req, res) => {
 })
 
 //Create a new post
-router.get('/add', (req, res) => {
+postRoutes.get('/add', (req, res) => {
     if (auth.auth) {
         res.render('postadd', {
             title: "Add Post",
@@ -106,7 +106,7 @@ router.get('/add', (req, res) => {
 })
 
 //Edit an already created and active post
-router.get('/edit/', (req, res) => {
+postRoutes.get('/edit/', (req, res) => {
     if (!req.query.pid) {
         res.redirect('/account/');
     } else if (!auth.auth) {
@@ -115,7 +115,7 @@ router.get('/edit/', (req, res) => {
         var f = authenticate.getPost(req.query.pid);
 
         f.then(resolve => {
-            if (resolve.pid == auth.user) {
+            if (resolve.pid == auth.pid) {
                 res.render('postedit', {
                     title : 'edit post',
                     post : resolve,
@@ -135,7 +135,7 @@ router.get('/edit/', (req, res) => {
 //Post request for posts
 
 //Search Posts
-router.post('/search', (req, res) => {
+postRoutes.post('/search', (req, res) => {
     var form = new frm.IncomingForm();
     console.log('Searching...')
     new Promise ((reso, reje) => {
@@ -168,4 +168,4 @@ router.post('/search', (req, res) => {
     })
 })
 
-module.exports = router;
+export { postRoutes }

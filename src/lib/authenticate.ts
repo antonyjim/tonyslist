@@ -5,33 +5,33 @@ import * as jwt from 'jsonwebtoken';
 
 // Local Modules
 var passwd = require('./passwd.js');
-var secrets = require('./boxofsecrets.j.js');
+import { poolConfig, jwtSecret } from './configurations'
 
 // Types
 import { Promise } from 'es6-promise';
 import { AuthPayload } from './../typings/core'
 
 //Global vars
-let connection = mysql.createConnection(secrets.connection);
-const secret = secrets.jwt;
+let connection = mysql.createPool(poolConfig);
 const saltRounds = secrets.salt;
 
 //User functions
 
 //Registration Action
-let add = (newUser)=>{
-    var query = new Promise ((resolve, reject) => {
-        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.username), 
+let add = (newUser) => {
+    var query = new Promise((resolve, reject) => {
+        connection.query('SELECT * FROM users WHERE username = ' + connection.escape(newUser.username),
             (err, results, fields) => {
-                if (err) {reject(err)} 
-                else if (results == "") {
+                if (err) {
+                    reject(err)
+                } else if (results == "") {
                     new Promise((resolve, reject) => {
                         bcrypt.hash(newUser.pass, saltRounds, (err, hash) => {
                             if (err) reject(err);
                             newUser.pass = hash;
                             resolve(0);
                         });
-                    }).then( value => {
+                    }).then(value => {
                         var email = passwd.sendVerEmail(newUser);
                         newUser.active = 1;
                         newUser.ptoken = '';
@@ -47,17 +47,17 @@ let add = (newUser)=>{
                         }).catch(err => {
                             reject(err);
                         })
-                        
+
                     });
-                    
+
                 } else {
                     reject(465);
                 }
-        });
+            });
     });
     query.then((value) => {
         return value;
-    },(reason) => {
+    }, (reason) => {
         console.error(reason);
         return 599;
     }).catch((err) => {
@@ -113,7 +113,7 @@ let authenticate = function(userData) {
                                 user: resolved.pid,
                                 userlevel: resolved.userlevel
                             };
-                            var token = jwt.sign(payload, secret, {
+                            var token = jwt.sign(payload, jwtSecret, {
                                 expiresIn: '1h'
                             });
                             resolve(token);
@@ -122,7 +122,7 @@ let authenticate = function(userData) {
                                 user: resolved.pid,
                                 userlevel: resolved.userlevel
                             };
-                            var token = jwt.sign(payload, secret, {
+                            var token = jwt.sign(payload, jwtSecret, {
                                 expiresIn: '1h'
                             });
                             reject({code : 472, user : results[0].pid, jwt: token})
@@ -234,7 +234,7 @@ let userDataUpd = userData => {
 //Verify token on incoming auth cookie
 let checkToken = token => {
     return new Promise ((res, rej) => {
-        jwt.verify(token, secret, (err, decoded) => {
+        jwt.verify(token, jwtSecret, (err, decoded) => {
             if (err) {rej(err.message)}
             else if (decoded) {
                 var payload = {
@@ -243,7 +243,7 @@ let checkToken = token => {
                     contact : decoded.contact,
                     zip : decoded.zip
                 };
-                var ntoken = jwt.sign(payload, secret, {expiresIn: '1h'});
+                var ntoken = jwt.sign(payload, jwtSecret, {expiresIn: '1h'});
                 var resolved: AuthPayload = {
                     auth : true,
                     pid : decoded.user,
@@ -567,7 +567,6 @@ export {
      updatePost, 
      cancelDelete, 
      updInfo,
-     add,
      authenticate,
      verEmail,
      checkExist,
