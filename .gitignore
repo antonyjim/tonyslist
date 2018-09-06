@@ -7,10 +7,6 @@ node_modules/
 #Runtimes
 *.pid
 package-lock.json
-<<<<<<< HEAD
 /lib/*
-=======
-/lib
->>>>>>> dc2c40ff57a414408f6d6a77708ac956293300ec
 
 boxofsecrets.j.ts
