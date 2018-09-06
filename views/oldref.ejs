@@ -1,0 +1,32 @@
+    
+    <!-- What 1 single post looks like -->
+    <% for (let m in post.results) { %>
+        <div class="top-article-slide">
+            <div class="article-slide-image">
+                <div class="">
+                    <div class="top-article-image-lightbox">
+                        <img class="article-slide-img" src="/public/images/<%=post.results[m].postPid%>/thmb.jpg">
+                        <span class="price">
+                                <%=post.results[m].price%>
+                        </span>
+                    </div>
+                    
+                    <a href="/posts/?pid=<%=post.results[m].post_pid%>" class="article-slide-title article-slide-a">
+                        <%=post.results[m].title%>
+                    </a> 
+                </div>
+            </div>
+        </div>
+    <% } %> 
+
+    <!-- What the category list looks like -->
+
+    <% for (let m in post.categories) { %>
+        <li class="category-item">
+            <a href="/posts/?cat=<%=post.categories[m].post%>">
+                <%=post.categories[m].post%>                    
+            </a>
+        </li>
+    <% } %>
+
+

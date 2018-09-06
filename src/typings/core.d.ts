@@ -6,7 +6,7 @@ interface AuthPayload {
     auth: boolean;
     userlevel: number;
     pid: string;
-    cookie?: string;
+    expiresIn?: string;
 }
 
 interface PostCond {
@@ -51,6 +51,21 @@ interface UserData {
     active?: boolean;
 }
 
+interface AdvancedUserData {
+    pid: string;
+    username: string;
+    pass: string;
+    email: string;
+    givenName: string;
+    famName: string;
+    userlevel: number;
+    active?: boolean;
+    setup?: boolean;
+    ptoken?: string;
+    emailReset?: string;
+    deletion?: string;
+}
+
 interface UserLogin {
     username: string;
     pass: string;
@@ -62,5 +77,6 @@ export {
     Post,
     PostList,
     UserData,
-    UserLogin
+    UserLogin,
+    AdvancedUserData
 }

@@ -1,7 +1,7 @@
 <% include partials/header %>
 
 <div class="login-modal" id="loginModal">
-    <form action="/login" method="POST">
+    <form name="login">
         <div class="modal-card" id="loginModalCard">
             <div class="modal-header">
                 <div class="modal-title">
@@ -10,23 +10,11 @@
             </div>
             <div class="modal-body">
                 <div class="modal-inputs">
-                    <input class="user-info login-info" type="text" placeholder="Email" maxlength="30" name="email" autocomplete="email">
-                    <input class="user-info login-info" type="password" placeholder="Password" name="password" autocomplete="current-password">
-                    <% if (passwordErr) { %>
+                    <input class="user-info login-info" type="text" placeholder="Username" maxlength="30" name="username" autocomplete="username">
+                    <input class="user-info login-info" type="password" placeholder="Password" name="pass" autocomplete="current-password">
                         <div class="pass-err">
-                            <p>
-                                <% if (passwordErr == 469) {%>
-                                    Password Reset Warrant Out
-                                <%} else if (passwordErr == 470) { %>
-                                    Please Verify Your Email Before Logging In
-                                <% } else { %>
-                                    Error! Incorrect Email or Password <%=passwordErr%>
-                                <% } %>
-
-                            </p>
                         </div>
-                    <%}%>
-                    <input class="login-submit" type="submit" value="Login">
+                    <input id="submit" class="login-submit" type="submit" value="Login">
                 </div>
                 <div class="modal-links">
                     <a class="modal-link" href="/users/forgot">Forgot Password</a>  |  <a class="modal-link" href="/register">Register</a>
@@ -35,5 +23,5 @@
         </div>
     </form>
 </div>
-
+<script src="/public/scripts/login.js"></script>
 <% include partials/footer %>

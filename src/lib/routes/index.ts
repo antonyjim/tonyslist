@@ -17,12 +17,12 @@ import * as jwt from 'jsonwebtoken'
 // Local Modules
 import { jwtSecret } from './../configurations'
 import { postRoutes } from './posts'
-import { newsRoutes } from './news';
-import { userRoutes } from './users';
+import { newsRoutes } from './news'
+import { userRoutes } from './users'
+import { rootRoutes } from './root';
 
 // Types
 import { AuthPayload } from '../../typings/core';
-import { appendFile } from 'fs';
 
 // Global Vars
 const router: express.Router = express.Router();
@@ -30,6 +30,7 @@ const router: express.Router = express.Router();
 // Middleware
 router.use(cookieParser())
 router.use((req: express.Request, res, next) => {
+    res.set('x-powered-by', 'Jetty(9.v20150224)')
     if (req.cookies.auth) {
         new Promise((resolve, reject) => {
             jwt.verify(
@@ -38,7 +39,8 @@ router.use((req: express.Request, res, next) => {
                 (err: jwt.JsonWebTokenError, decoded: AuthPayload) => {
                     if (err) reject(err)
                     if (decoded) {
-                        let ntoken = jwt.sign(decoded, jwtSecret, {expiresIn: '1h'})
+                        decoded.expiresIn = '1h'
+                        let ntoken = jwt.sign(decoded, jwtSecret)
                         req.auth = decoded
                         resolve(ntoken)
                     } else {
@@ -60,6 +62,7 @@ router.use((req: express.Request, res, next) => {
             next()
         })
         .catch(err => {
+            console.log(err);
             req.auth = {
                 auth: false,
                 userlevel: 0,
@@ -69,6 +72,15 @@ router.use((req: express.Request, res, next) => {
             res.cookie('auth', ntoken)
             next()
         })
+    } else {
+        req.auth = {
+            auth: false,
+            userlevel: 0,
+            pid: 'anon'
+        }
+        let ntoken = jwt.sign(req.auth, jwtSecret, {expiresIn: '1h'})
+        res.cookie('auth', ntoken)
+        next()
     }
 })
 
@@ -76,12 +88,6 @@ router.use((req: express.Request, res, next) => {
 router.use('/posts', postRoutes)
 router.use('/news', newsRoutes)
 router.use('/users', userRoutes)
-
-router.get('/', (req, res) => {
-    res.render('index', {
-        title: "tonyslist",
-        auth: req.auth
-    })
-})
+router.use('/', rootRoutes)
 
 export { router }

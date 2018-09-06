@@ -3,6 +3,7 @@ exports.__esModule = true;
 var path = require("path");
 var express = require("express");
 var index_1 = require("./lib/routes/index");
+global.AppRoot = __dirname;
 var app = express();
 var port = 8080;
 app.use('/', index_1.router);
