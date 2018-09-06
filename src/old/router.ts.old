@@ -22,7 +22,7 @@ import {
     forcePass,
     updatePost,
     updInfo
- } from '../authenticate';
+ } from './authenticate';
 
 let gr = require('./global_resources');
 let passwd = require('./passwd.js');
@@ -33,7 +33,7 @@ let news = require('./news');
 import { 
     AuthPayload,
     Post
- } from '../../typings/core';
+ } from '../typings/core';
 import { Promise } from 'es6-promise';
 
 //Global Namespace

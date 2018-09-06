@@ -1,143 +1,116 @@
+/**
+ * Handle the requests passed to the /posts route
+ * This time, keep the logic and the routing seperate from one another
+ */
 
-var express = require('express');
-var authenticate = require('./authenticate');
-var frm = require('formidable');
-var uuidv4 = require('uuid/v4');
+// Core Node Modules
+
+
+// NPM Modules
+import * as express from 'express'
+import * as frm from 'formidable'
+import * as uuidv4 from 'uuid/v4'
+
+// Local Modules
+import { getList, getPost, searchPosts } from '../controllers/posts'
 
 // Types
-import { PostCond, AuthPayload } from '../../typings/core';
-import { Promise } from 'es6-promise';
+import { PostCond, Post } from '../../typings/core';
 
-var postRoutes = express.Router();
+// Global Variables
+let postRoutes: express.Router = express.Router()
 
-let auth: AuthPayload
+/**
+ * Process GET requests
+ */
 
-postRoutes.use((req, res, next) => {
-    if (req.cookies.auth) {
-        var authedd = authenticate.checkToken(req.cookies.auth);
-        
-        authedd.then (resolve => {
-            auth.auth = resolve.auth;
-            auth.pid = resolve.pid;
-            auth.userlevel = resolve.userlevel;
-            res.cookie('auth', resolve.cookie);
-            next();
-        }, reason => {
-            auth.auth = false;
-            auth.userlevel = 0;
-            res.cookie('auth', null);
-            next();
-        }).catch(err => {
-            console.log('Authedd.catch', err);
-        })
-    } else {
-        auth.auth = false;
-        auth.userlevel = 0;
-        next();
-    }
-});
-
-//Main post listing screen.
-postRoutes.get('/', (req, res) => {
+postRoutes.get('/', (req: express.Request, res: express.Response) => {
     var conditions: PostCond;
     if (req.query.cat) {
         conditions.active = true;
         conditions.post = req.query.cat.split(' ');
     } else if (req.query.pid) {
         conditions.active = true;
-        conditions.post_pid = req.query.pid;
+        conditions.postPid = req.query.pid;
     } else {
         conditions.active = true;
     }
 
-    var getting = authenticate.getList(conditions);
-
-    getting.then(results => {
+    getList(conditions)
+    .then((results: any) => {
         if (results.length == 1) {
-            authenticate.getPost(results[0].postPid)
-            .then (resolve => {
-                res.render('indivpost', {
-                    title : resolve.title,
-                    post: resolve,
-                    auth : auth
-                })
-            }, rejected => {
-                res.render('500', {
-                    title: 'Internal Server Error',
-                    auth : auth,
-                    error : rejected
-                })
-            }).catch(err => {
-                console.log(err);
+            res.render('indivpost', {
+                title : results[0].title,
+                post: results[0],
+                auth : req.auth
             })
-            
         } else {
             res.render('postlist', {
                 title: 'Posts',
                 post: results,
-                auth : auth
+                auth : req.auth
             })
         }
     }, reason => {
         console.log(reason);
         res.render('post404', {
             title : 'Not Found',
-            auth : auth
+            auth : req.auth
         })
     }).catch(err => {
         console.log(err);
     })
 })
 
-//Create a new post
-postRoutes.get('/add', (req, res) => {
-    if (auth.auth) {
+// Create a new post
+postRoutes.get('/add', (req: express.Request, res: express.Response) => {
+    if (req.auth.auth) {
         res.render('postadd', {
             title: "Add Post",
             errlev : 0,
             uuid : uuidv4().slice(0, 7),
-            auth : auth
+            auth : req.auth
         })
     } else {
         res.redirect('/login/');
     }
-
-    
 })
 
-//Edit an already created and active post
-postRoutes.get('/edit/', (req, res) => {
-    if (!req.query.pid) {
+// Edit an already created and active post
+postRoutes.get('/edit/:pid', (req: express.Request, res: express.Response) => {
+    if (!req.params.pid) {
         res.redirect('/account/');
-    } else if (!auth.auth) {
+    } else if (!req.auth.auth) {
         res.redirect('/login/');
     } else if (req.query.pid) {
-        var f = authenticate.getPost(req.query.pid);
-
-        f.then(resolve => {
-            if (resolve.pid == auth.pid) {
+        getPost(req.query.pid)
+        .then((resolve: Post) => {
+            if (resolve.pid == req.auth.pid) {
                 res.render('postedit', {
                     title : 'edit post',
                     post : resolve,
-                    auth : auth
+                    auth : req.auth
                 })
             } else {
-                res.redirect('/account/');
+                res.redirect('/account/')
             }
         }, reason => {
-            res.redirect('/account/?' + reason);
-        }).catch (err => {res.redirect('/account/?' + err)})
+            res.redirect('/account/?' + reason)
+        }).catch (err => {
+            res.redirect('/account/?' + err)
+        })
     } else {
         res.redirect ('/posts/');
     }
 })
 
-//Post request for posts
+/**
+ * Process POST requests
+ */
 
-//Search Posts
-postRoutes.post('/search', (req, res) => {
-    var form = new frm.IncomingForm();
-    console.log('Searching...')
+// Search Posts
+postRoutes.post('/search', (req: express.Request, res: express.Response) => {
+    var form: frm.IncomingForm = new frm.IncomingForm()
     new Promise ((reso, reje) => {
         form.parse(req, (err, fields: { conditions: string }) => {
             console.log(fields);
@@ -148,24 +121,24 @@ postRoutes.post('/search', (req, res) => {
                 reso(fields);
             }
         })
-    }).then((resolve: {conditions: string}) => {
+    })
+    .then((resolve: {conditions: string}) => {
         if (resolve.conditions) {
-            authenticate.searchPosts(resolve.conditions).then(resolve => {
-                JSON.stringify(resolve);
-                console.log('resolve', resolve);
-                res.send(resolve);
+            searchPosts(resolve.conditions).then(resolve => {
+                JSON.stringify(resolve)
+                console.log('resolve', resolve)
+                res.json(resolve)
             }, reason => {
-                console.log(reason);
-                res.sendStatus(reason)
+                res.status(reason)
             })
         } else {
-            res.sendStatus(404)
+            res.status(404)
         }
     }, reason => {
-        res.sendStatus(reason);
+        res.status(reason)
     }).catch(err => {
-        res.sendStatus(404);
+        res.status(404)
     })
 })
-
+// Exports
 export { postRoutes }

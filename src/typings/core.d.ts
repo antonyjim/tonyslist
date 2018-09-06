@@ -10,9 +10,9 @@ interface AuthPayload {
 }
 
 interface PostCond {
-    active: boolean;
-    post: string; //Category
-    post_pid: string;
+    active?: boolean;
+    post?: Array<string>; //Category
+    postPid?: string;
 }
 
 interface Post {
@@ -28,6 +28,11 @@ interface Post {
     lastViewed: Date;
     viewCount: number;
     active: boolean;
+    images: Array<string>
+}
+
+interface PostList {
+    [index: number]: Post
 }
 
 interface SimpleUser {
@@ -55,6 +60,7 @@ export {
     PostCond, 
     AuthPayload,
     Post,
+    PostList,
     UserData,
     UserLogin
 }

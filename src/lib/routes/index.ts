@@ -22,6 +22,7 @@ import { userRoutes } from './users';
 
 // Types
 import { AuthPayload } from '../../typings/core';
+import { appendFile } from 'fs';
 
 // Global Vars
 const router: express.Router = express.Router();
@@ -75,5 +76,12 @@ router.use((req: express.Request, res, next) => {
 router.use('/posts', postRoutes)
 router.use('/news', newsRoutes)
 router.use('/users', userRoutes)
+
+router.get('/', (req, res) => {
+    res.render('index', {
+        title: "tonyslist",
+        auth: req.auth
+    })
+})
 
 export { router }

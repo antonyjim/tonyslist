@@ -5,11 +5,11 @@ import * as jwt from 'jsonwebtoken';
 
 // Local Modules
 var passwd = require('./passwd.js');
-import { poolConfig, jwtSecret } from './configurations'
+import { poolConfig, jwtSecret } from '../lib/configurations'
 
 // Types
 import { Promise } from 'es6-promise';
-import { AuthPayload } from './../typings/core'
+import { AuthPayload } from '../typings/core'
 
 //Global vars
 let connection = mysql.createPool(poolConfig);
@@ -470,8 +470,8 @@ let getPost = postPid => {
     }
 }
 
-//Get posts for the main /posts screen,
-//if there is only 1 result, redirect to individual post screen.
+// Get posts for the main /posts screen,
+// if there is only 1 result, redirect to individual post screen.
 let getList = (conditions) => {
     var post = '';
     if (conditions.post) {

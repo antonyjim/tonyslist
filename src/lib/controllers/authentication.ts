@@ -5,7 +5,8 @@ import * as jwt from 'jsonwebtoken';
 import * as nodemailer from 'nodemailer';
 
 // Local Modules
-import { poolConfig, transporterConfig } from '../configurations';
+import { transporterConfig } from '../configurations';
+import { getPool } from '../pool'
 
 // Types
 import { UserData, UserLogin, AuthPayload } from './../../typings/core';
@@ -13,8 +14,8 @@ import { Promise } from 'es6-promise';
 import { Transporter } from 'nodemailer';
 
 //Global Vars
-const pool: mysql.Pool = mysql.createPool(poolConfig);
-const saltRounds: number = 12;
+const saltRounds: number = 12
+const pool: mysql.Pool = getPool()
 
 class Register {
     private user: UserData;

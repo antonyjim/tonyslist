@@ -35,3 +35,10 @@ The goal with this branch is to meet some of the goals in my last update as well
  - Compile my client side JS with Babel
  - Maybe incorporate some sort of SPA
  - Work out the many bugs that are present in the pure JS branch
+
+
+ ## Update 9/4/18
+
+ ### tonyslist 2.0 in full swing
+
+ What started out as a slight transition to typescript has turned into a full blown rewrite of tonylist as we know it. With the most recent changes, it has moved more to fit in with the MVC view, as is evident from the file structure changes. Typescript comes with its own hurdles, but on a whole, the site is moving to a much easier to understand code flow. Another added bonus of typescript that was not considered before, is the ease of tracing down bugs. Even in a project as small as tonyslist.

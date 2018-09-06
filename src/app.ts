@@ -5,8 +5,11 @@ import * as cluster from 'cluster'
 // NPM Modules
 import * as express from 'express'
 
-//Local Modules
+// Local Modules
 import { router } from './lib/routes/index'
+
+// Global Variables
+global.AppRoot = __dirname
 /*
 if (cluster.isMaster) {
     var cpuCount = require('os').cpus().length;

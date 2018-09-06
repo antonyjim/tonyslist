@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
  // Local Modules
 import * as authenticate from "./authenticate";
-import { secret, transporter } from "./boxofsecrets.j";
+import { secret, transporter } from "./boxofsecrets";
 
  // Types
 import { Promise } from 'es6-promise';
