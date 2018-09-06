@@ -45,7 +45,7 @@ postRoutes.get('/', (req, res) => {
         conditions.post = req.query.cat.split(' ');
     } else if (req.query.pid) {
         conditions.active = true;
-        conditions.post_pid = req.query.pid;
+        conditions.postPid = req.query.pid;
     } else {
         conditions.active = true;
     }
