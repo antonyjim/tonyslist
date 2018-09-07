@@ -17,34 +17,47 @@ let rootRoutes: express.Router = express.Router()
 
 // Get Requests
 
-rootRoutes.get('/', (req, res) => {
+rootRoutes.get('/', (req: express.Request, res: express.Response) => {
     res.render('index', {
         title: "tonyslist",
         auth: req.auth
     })
 })
 
-rootRoutes.get('/login', (req, res) => {
-    res.render('login', {
-        title: 'login',
-        auth: req.auth,
-        passwordErr: ''
-    })
+rootRoutes.get('/login', (req: express.Request, res: express.Response) => {
+    if (!req.auth.auth) {
+        res.render('login', {
+            title: 'login',
+            auth: req.auth
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+
+rootRoutes.get('/register', (req: express.Request, res: express.Response) => {
+    if (!req.auth.auth) {
+        res.render('register', {
+            title: 'register',
+            auth: req.auth
+        })
+    } else {
+        res.redirect('/')
+    }
 })
 
 //Post Requests
 
-rootRoutes.post('/login', (req, res) => {
+rootRoutes.post('/login', (req: express.Request, res: express.Response) => {
     let form: frm.IncomingForm = new frm.IncomingForm()
     new Promise ((resolve, reject) => {
         form.parse(req, (err, fields, files) => {
             if (err) {throw err}
             if (!fields) {
                 reject('empty')
-            } else if (fields.username && fields.password) {
+            } else if (fields.username && fields.pass) {
                 resolve(fields)
             } else {
-                console.log(JSON.stringify(fields))
                 reject('wrong data')
             }
         })
@@ -54,13 +67,21 @@ rootRoutes.post('/login', (req, res) => {
             username: onSuccess.username,
             pass: onSuccess.pass
         }).auth()
-    .then ((onSuccess: {status: string, cookie: string, message?: string}) => {
-        res.json(JSON.stringify(onSuccess))
-    }, (onFailure?: {status: string, reason?: string, redirect?: string}) => {
-        res.json(JSON.stringify(onFailure))
+        .then ((onSuccess: {status: string, cookie: string, message?: string}) => {
+            console.log(JSON.stringify(onSuccess))
+            res.json(JSON.stringify(onSuccess))
+        }, (onFailure?: {status: string, reason?: string, redirect?: string}) => {
+            console.log(JSON.stringify(onFailure))
+            res.json(JSON.stringify(onFailure))
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500)
+        })
+    }, (onFailure) => {
+        res.status(403)
     })
-    .catch(err => {
-        console.log(err)
+    .catch (err => {
         res.status(500)
     })
 })

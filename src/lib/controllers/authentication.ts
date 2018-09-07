@@ -83,27 +83,29 @@ class Login {
      *  Query database for login, issue token
      */
     constructor(login) {
-        this.user = login;        
+        this.user = login;     
+        console.log(JSON.stringify(this.user))   
     }
 
     public auth = () => {
         /**
          * Status codes:
-         * 0 = All Okay
+         * 0 = All Okay and redirect
          * 1 = Okay, but display a message
-         * 2 = Okay, but redirect
-         * 3 = Not okay, display a message
-         * 4 = Incorrect Username or password
-         * 5 = Internal server error
+         * 2 = Not okay, display a message
+         * 3 = Incorrect Username or password
+         * 4 = Internal server error
          */
         return new Promise((resolve, reject) => {
             pool.query(`SELECT pid, email, givenName, famName, userlevel,
             ptoken, emailReset, deletion, active, setup FROM users WHERE 
             username = ?`,
-            [this.user.username], 
+            this.user.username, 
             (err, results: Array<AdvancedUserData>, fields) => {
+                console.log(results);
                 if (err) {throw err}
-                if (results == []) {
+                if (results.length === 0) {
+                    console.log('Not found')
                     reject({
                         status: 4
                     })
@@ -128,7 +130,7 @@ class Login {
                 if (userResults.ptoken != '') {
                     reject({
                         reason: 'Please check your email for a new password',
-                        status: 3
+                        status: 2
                     })
                 } else if (userResults.deletion != '') {
                     resolve({
@@ -139,16 +141,17 @@ class Login {
                 } else if (userResults.emailReset != '') {
                     reject({
                         reason: 'Please verify your email before logging in. Another email verification has been sent.',
-                        status: 3
+                        status: 2
                     })
                 } else if (!userResults.setup) {
                     resolve({
                         redirect: '/login/setup',
-                        status: 2,
+                        status: 0,
                         cookie: authToken
                     })
                 } else {
                     resolve({
+                        redirect: '/',
                         status: 0,
                         cookie: authToken
                     })

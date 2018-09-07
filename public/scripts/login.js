@@ -1,41 +1,57 @@
-if (document.readyState == 'loading') {
-    document.addEventListener('DOMContentLoaded', handleOnLoad);
-}
-else {
-    handleOnLoad();
-}
-var handleOnLoad = function () {
-    document.getElementById('submit').addEventListener('click', function () {
-        submitForm('/login', 'POST', 'login-info');
-    });
+var incorrectUsernameOrPassword = function () {
 };
-var submitForm = function (url, method, selector) {
-    var info = document.querySelectorAll(selector);
-    var form = new FormData;
-    info.forEach(function (field) {
-        form.append(field.name, field.value);
-    });
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'content-type': 'multipart/form-data'
-        },
-        credentials: 'include',
-        body: form
-    })
-        .then(function (response) {
-        handleOnResponse(response);
-    })["catch"](function (err) {
-        processErr(500);
-    });
+var processErr = function (err) {
+    console.error(err);
 };
-var processErr = function (errCode) {
-};
-var handleOnResponse = function (res) {
-    if (res.status >= 200 && res.status < 300) {
+var handleOnResponse = function (response) {
+    if (response.status === 0) {
+        window.location.href = response.redirect;
+    }
+    else if (response.status === 1) {
+        openModal({ message: response.message });
+    }
+    else if (response.status === 2) {
+        window.location.href = response.redirect;
+    }
+    else if (response.status === 3) {
+        openModal({ reason: response.reason });
+    }
+    else if (response.status === 4) {
+        incorrectUsernameOrPassword();
     }
     else {
-        var error = new Error(res.statusText);
-        throw error;
+        openModal({ reason: 'An unknown error occured, please try again later' });
     }
 };
+var handleOnLogonLoad = function () {
+    console.log('Parsed Login');
+    document.getElementById('submit').addEventListener('click', function () {
+        submitForm({
+            url: '/login',
+            selector: '.login-input',
+            method: 'POST'
+        }).then(function (response) {
+            switch (response.status) {
+                case 0: {
+                    document.cookie = "auth=" + response.cookie;
+                    window.location.href = response.redirect;
+                }
+                case 1: {
+                    document.cookie = "auth=" + response.cookie;
+                }
+                case 2: {
+                }
+                case 3: {
+                }
+                default: {
+                }
+            }
+        });
+    });
+};
+if (document.readyState == 'loading') {
+    document.addEventListener('DOMContentLoaded', handleOnLogonLoad);
+}
+else {
+    handleOnLogonLoad();
+}
